@@ -882,31 +882,43 @@ async function fetchCSV(url) {
   if (!url || !url.includes('docs.google.com')) return null;
   const u = url.includes('output=csv') ? url : url + (url.includes('?') ? '&' : '?') + 'output=csv';
 
-  // 1. Try via Supabase Edge Function (most reliable — server-side, no CORS)
+  // 1. Try via Supabase Edge Function
+  console.log('[fetchCSV] Trying Edge Function…');
   try {
     const r = await fetch(`${SB_URL}/functions/v1/fetch-csv`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_KEY },
       body: JSON.stringify({ url: u })
     });
+    console.log('[fetchCSV] Edge Function status:', r.status);
     if (r.ok) {
       const text = await r.text();
+      console.log('[fetchCSV] Edge Function got text, length:', text.length, '| preview:', text.slice(0,80));
       if (text.includes(',')) return text;
+      console.warn('[fetchCSV] Edge Function response has no commas — not valid CSV');
+    } else {
+      const err = await r.text();
+      console.warn('[fetchCSV] Edge Function error body:', err);
     }
-  } catch(e) {}
+  } catch(e) { console.warn('[fetchCSV] Edge Function exception:', e.message); }
 
-  // 2. Fallback: try direct (works on localhost)
+  // 2. Direct fetch
+  console.log('[fetchCSV] Trying direct fetch…');
   try {
     const r = await fetch(u, { cache: 'no-store' });
+    console.log('[fetchCSV] Direct fetch status:', r.status);
     if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
-  } catch(e) {}
+  } catch(e) { console.warn('[fetchCSV] Direct fetch exception:', e.message); }
 
-  // 3. Last resort: corsproxy.io
+  // 3. corsproxy.io
+  console.log('[fetchCSV] Trying corsproxy.io…');
   try {
     const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(u), { cache: 'no-store' });
+    console.log('[fetchCSV] corsproxy status:', r.status);
     if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
-  } catch(e) {}
+  } catch(e) { console.warn('[fetchCSV] corsproxy exception:', e.message); }
 
+  console.error('[fetchCSV] All methods failed for URL:', u);
   return null;
 }
 
