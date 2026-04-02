@@ -878,27 +878,35 @@ function parseCSV(text) {
 // ── GOOGLE SHEETS FETCH ───────────────────────────────────────────────────────
 // Uses a CORS proxy as fallback since Google Sheets blocks direct fetch from
 // file:// and some hosted origins
-const CORS_PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
-  'https://cors-anywhere.herokuapp.com/',
-];
-
 async function fetchCSV(url) {
   if (!url || !url.includes('docs.google.com')) return null;
-  let u = url.includes('output=csv') ? url : url + (url.includes('?') ? '&' : '?') + 'output=csv';
-  // Try direct first
+  const u = url.includes('output=csv') ? url : url + (url.includes('?') ? '&' : '?') + 'output=csv';
+
+  // 1. Try via Supabase Edge Function (most reliable — server-side, no CORS)
+  try {
+    const r = await fetch(`${SB_URL}/functions/v1/fetch-csv`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_KEY },
+      body: JSON.stringify({ url: u })
+    });
+    if (r.ok) {
+      const text = await r.text();
+      if (text.includes(',')) return text;
+    }
+  } catch(e) {}
+
+  // 2. Fallback: try direct (works on localhost)
   try {
     const r = await fetch(u, { cache: 'no-store' });
     if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
   } catch(e) {}
-  // Try each CORS proxy
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const r = await fetch(proxy + encodeURIComponent(u), { cache: 'no-store' });
-      if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
-    } catch(e) {}
-  }
+
+  // 3. Last resort: corsproxy.io
+  try {
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(u), { cache: 'no-store' });
+    if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
+  } catch(e) {}
+
   return null;
 }
 
