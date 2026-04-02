@@ -808,21 +808,42 @@ function renderBulletin(){
 
 // ── CSV PARSER ───────────────────────────────────────────────────────────
 function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());
-  if(lines.length<2) return [];
-  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
-  return lines.slice(1).map(line=>{
+  // Strip BOM, normalize line endings, trim whitespace
+  const clean = text.replace(/^﻿/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
+  const allLines = clean.split('\n');
+
+  // Parse a single CSV line handling quoted fields
+  function parseLine(line){
     const cols=[]; let cur='',inQ=false;
     for(const ch of line){
       if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
+      else if(ch===','&&!inQ){cols.push(cur.replace(/^"|"$/g,'').trim());cur='';}
       else cur+=ch;
     }
-    cols.push(cur.trim());
+    cols.push(cur.replace(/^"|"$/g,'').trim());
+    return cols;
+  }
+
+  // Find the header row — it's the first row that contains 'name' or 'Name'
+  let headerIdx = -1;
+  for(let i=0;i<Math.min(allLines.length,5);i++){
+    const lower = allLines[i].toLowerCase();
+    if(lower.includes('name') && lower.includes(',')){ headerIdx=i; break; }
+  }
+  if(headerIdx===-1){ console.warn('[CSV] Could not find header row in first 5 lines'); return []; }
+
+  const lines = allLines.slice(headerIdx).filter(l=>l.trim());
+  if(lines.length<2){ console.warn('[CSV] Not enough data rows after header'); return []; }
+
+  const headers = parseLine(lines[0]).map(h=>h.toLowerCase().trim().replace(/\s+/g,''));
+  console.log('[CSV] Header row at index',headerIdx,'| headers:', headers);
+
+  return lines.slice(1).map(line=>{
+    const cols = parseLine(line);
     const obj={};
-    headers.forEach((h,i)=>{obj[h]=(cols[i]||'').replace(/^"|"$/g,'').trim();});
+    headers.forEach((h,i)=>{ obj[h]=(cols[i]||'').trim(); });
     return obj;
-  }).filter(r=>r[headers[0]]);
+  }).filter(r=>r[headers[0]]); // skip empty rows
 }
 
 // ── GOOGLE SHEETS FETCH ──────────────────────────────────────────────────
@@ -837,12 +858,15 @@ async function fetchCSV(url){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
       body:JSON.stringify({url:u})
     });
-    if(r.ok){
-      const text=await r.text();
-      if(text.length>10&&text.includes(',')&&!text.includes('{')) return text;
-      console.warn('[CSV] Edge fn returned non-CSV:',text.slice(0,120));
-    } else {
-      console.warn('[CSV] Edge fn status:',r.status, await r.text().catch(()=>''));
+    const text=await r.text();
+    console.log('[CSV] Edge fn status:',r.status,'| length:',text.length,'| preview:',text.slice(0,120));
+    if(r.ok&&text.length>10&&text.includes(',')){
+      // Check it's not a JSON error response
+      if(!text.trimStart().startsWith('{')){
+        console.log('[CSV] Edge fn SUCCESS');
+        return text;
+      }
+      console.warn('[CSV] Edge fn returned JSON not CSV:',text.slice(0,120));
     }
   }catch(e){console.warn('[CSV] Edge fn exception:',e.message);}
 
@@ -885,11 +909,22 @@ async function loadSheetData(){
 
   if(hasS){
     const csv=await fetchCSV(sUrl);
+    console.log('[SESSION] csv received:',!!csv,'length:',csv?.length);
     if(csv){
       const rows=parseCSV(csv);
-      const valid=rows.filter(r=>r.name&&['confirmed','tentative','out'].includes((r.status||'').toLowerCase()));
+      console.log('[SESSION] parsed rows:',rows.length,'| first row:',JSON.stringify(rows[0]));
+      // Accept name/Name/NAME and status/Status/STATUS
+      const getVal=(r,key)=>r[key]||r[key.toLowerCase()]||r[key.toUpperCase()]||r[key[0].toUpperCase()+key.slice(1)]||'';
+      const valid=rows.filter(r=>{
+        const n=getVal(r,'name'); const s=(getVal(r,'status')||'').toLowerCase();
+        return n && ['confirmed','tentative','out'].includes(s);
+      });
+      console.log('[SESSION] valid rows:',valid.length, valid.length?'first:'+JSON.stringify(valid[0]):'');
       if(valid.length){
-        SESSION=valid.map(r=>({name:r.name.trim(),status:r.status.toLowerCase().trim()}));
+        SESSION=valid.map(r=>({
+          name:(getVal(r,'name')).trim(),
+          status:(getVal(r,'status')).toLowerCase().trim()
+        }));
         sOk=true;
       }
     }
@@ -898,20 +933,24 @@ async function loadSheetData(){
 
   if(hasL){
     const csv=await fetchCSV(lUrl);
+    console.log('[LB] csv received:',!!csv,'length:',csv?.length);
     if(csv){
       const rows=parseCSV(csv);
-      const valid=rows.filter(r=>r.name&&r.mmr);
+      console.log('[LB] parsed rows:',rows.length,'| first row:',JSON.stringify(rows[0]));
+      const gv=(r,k)=>r[k]||r[k.toLowerCase()]||r[k.toUpperCase()]||r[k[0].toUpperCase()+k.slice(1)]||'';
+      const valid=rows.filter(r=>gv(r,'name')&&gv(r,'mmr'));
+      console.log('[LB] valid rows:',valid.length, valid.length?'first:'+JSON.stringify(valid[0]):'');
       if(valid.length){
         LB=valid.map(r=>({
-          name:      r.name.trim(),
-          mmr:       parseInt(r.mmr)||0,
-          prevRank:  parseInt(r.prevrank||r.prevRank)||0,
-          wins:      parseInt(r.wins)||0,
-          losses:    parseInt(r.losses)||0,
-          lastPlayed:r.lastplayed||r.lastPlayed||'—',
-          duo:       r.duo||'—',
-          streak:    parseInt(r.streak)||0,
-          tier:      (r.tier||'bronze').toLowerCase().trim(),
+          name:      (gv(r,'name')).trim(),
+          mmr:       parseInt(gv(r,'mmr'))||0,
+          prevRank:  parseInt(gv(r,'prevrank')||gv(r,'prevRank'))||0,
+          wins:      parseInt(gv(r,'wins'))||0,
+          losses:    parseInt(gv(r,'losses'))||0,
+          lastPlayed:gv(r,'lastplayed')||gv(r,'lastPlayed')||'—',
+          duo:       gv(r,'duo')||'—',
+          streak:    parseInt(gv(r,'streak'))||0,
+          tier:      (gv(r,'tier')||'bronze').toLowerCase().trim(),
         })).sort((a,b)=>b.mmr-a.mmr);
         lOk=true;
       }
