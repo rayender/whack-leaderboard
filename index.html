@@ -648,380 +648,303 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 <div id="toast"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+// WHACK GROUP — Main Script
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── CONSTANTS ────────────────────────────────────────────────────────────
 const ADMIN_PIN = '123456';
 const CFG_KEY   = 'wg_cfg';
+const SB_URL    = 'https://iweyxgakgqbunfzbrrgn.supabase.co';
+const SB_KEY    = 'sb_publishable_6gjhBP8aIS1pu8GwJV2S5Q_4Loruowz';
 
 const CFG_DEFAULTS = {
-  sessionDate: '', day: 5,
-  hourStart: 19, minuteStart: 0,
-  hourEnd: 22,   minuteEnd: 0,
-  maxSlots: 32,
-  season: 'Season 1',
-  sheetUrlSession: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=214704834&single=true&output=csv',
-  sheetUrlLB:      'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=1526076979&single=true&output=csv'
+  sessionDate:'', day:5,
+  hourStart:19, minuteStart:0,
+  hourEnd:22,   minuteEnd:0,
+  maxSlots:32,
+  season:'Season 1',
+  sheetUrlSession:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=214704834&single=true&output=csv',
+  sheetUrlLB:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=1526076979&single=true&output=csv'
 };
 
-let cfg = { ...CFG_DEFAULTS };
+let cfg = {...CFG_DEFAULTS};
 
-function saveCfg() {
-  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
-}
-function loadCfg() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
-    cfg = { ...CFG_DEFAULTS, ...saved };
-  } catch(e) { cfg = { ...CFG_DEFAULTS }; }
-  // Apply season label
-  document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
-}
+// ── MOCK FALLBACK DATA ───────────────────────────────────────────────────
+const MOCK_LB = [
+  {name:'Marcus T.',mmr:2180,prevRank:2,wins:48,losses:12,lastPlayed:'Jun 14',duo:'Ryan K.',  streak:5,tier:'diamond'},
+  {name:'Ryan K.',  mmr:2050,prevRank:1,wins:41,losses:14,lastPlayed:'Jun 14',duo:'Marcus T.',streak:2,tier:'diamond'},
+  {name:'Jess L.',  mmr:1890,prevRank:3,wins:37,losses:15,lastPlayed:'Jun 7', duo:'Sam P.',   streak:0,tier:'platinum'},
+  {name:'Sam P.',   mmr:1740,prevRank:5,wins:33,losses:16,lastPlayed:'Jun 14',duo:'Jess L.',  streak:3,tier:'platinum'},
+  {name:'Leo V.',   mmr:1680,prevRank:4,wins:29,losses:18,lastPlayed:'Jun 7', duo:'Nico R.',  streak:0,tier:'gold'},
+  {name:'Nico R.',  mmr:1590,prevRank:6,wins:27,losses:20,lastPlayed:'Jun 14',duo:'Leo V.',   streak:1,tier:'gold'},
+  {name:'Priya M.', mmr:1420,prevRank:8,wins:24,losses:22,lastPlayed:'Jun 7', duo:'Dana W.',  streak:4,tier:'gold'},
+  {name:'Dana W.',  mmr:1310,prevRank:7,wins:20,losses:24,lastPlayed:'Jun 14',duo:'Priya M.', streak:0,tier:'silver'},
+  {name:'Kai T.',   mmr:1190,prevRank:9,wins:18,losses:25,lastPlayed:'Jun 7', duo:'Marc B.',  streak:0,tier:'silver'},
+  {name:'Marc B.',  mmr:1080,prevRank:10,wins:15,losses:27,lastPlayed:'Jun 1',duo:'Kai T.',   streak:0,tier:'silver'},
+  {name:'Tina F.',  mmr:950, prevRank:12,wins:12,losses:30,lastPlayed:'Jun 7',duo:'Josh A.',  streak:2,tier:'bronze'},
+  {name:'Josh A.',  mmr:880, prevRank:11,wins:10,losses:28,lastPlayed:'Jun 14',duo:'Tina F.', streak:0,tier:'bronze'},
+];
+const MOCK_SESSION = [
+  {name:'Marcus T.',status:'confirmed'},{name:'Ryan K.',  status:'confirmed'},
+  {name:'Jess L.',  status:'confirmed'},{name:'Sam P.',   status:'confirmed'},
+  {name:'Leo V.',   status:'confirmed'},{name:'Nico R.',  status:'confirmed'},
+  {name:'Priya M.', status:'confirmed'},{name:'Dana W.',  status:'confirmed'},
+  {name:'Kai T.',   status:'confirmed'},{name:'Marc B.',  status:'confirmed'},
+  {name:'Tina F.',  status:'tentative'},{name:'Josh A.',  status:'tentative'},
+  {name:'Zara Q.',  status:'tentative'},{name:'Ben O.',   status:'tentative'},
+  {name:'Lena K.',  status:'out'},      {name:'Chris P.', status:'out'},
+];
 
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
-const SB_URL = 'https://iweyxgakgqbunfzbrrgn.supabase.co';
-const SB_KEY = 'sb_publishable_6gjhBP8aIS1pu8GwJV2S5Q_4Loruowz';
+let LB      = [...MOCK_LB];
+let SESSION = [...MOCK_SESSION];
 
-function sbHeaders() {
-  return {
-    'Content-Type':  'application/json',
-    'apikey':        SB_KEY,
-    'Authorization': 'Bearer ' + SB_KEY,
-    'Prefer':        'return=representation'
-  };
-}
+const TIERS = [
+  {name:'Diamond', min:2000,cls:'t-diamond', icon:'💎'},
+  {name:'Platinum',min:1600,cls:'t-platinum',icon:'🔷'},
+  {name:'Gold',    min:1200,cls:'t-gold',    icon:'🥇'},
+  {name:'Silver',  min:900, cls:'t-silver',  icon:'🥈'},
+  {name:'Bronze',  min:0,   cls:'t-bronze',  icon:'🥉'},
+];
 
-async function sbGet(table, query = '') {
-  try {
-    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
-      headers: { ...sbHeaders(), 'Prefer': '' }
-    });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch(e) { return null; }
-}
-
-async function sbPost(table, body) {
-  try {
-    const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
-      method: 'POST', headers: sbHeaders(),
-      body: JSON.stringify(body)
-    });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch(e) { return null; }
-}
-
-async function sbPatch(table, query, body) {
-  try {
-    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
-      method: 'PATCH', headers: sbHeaders(),
-      body: JSON.stringify(body)
-    });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch(e) { return null; }
-}
-
-async function sbDelete(table, query) {
-  try {
-    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
-      method: 'DELETE', headers: { ...sbHeaders(), 'Prefer': '' }
-    });
-    return r.ok;
-  } catch(e) { return false; }
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const pad2  = n => String(n).padStart(2,'0');
+const ini   = n => n.split(' ').map(x=>x[0]).join('').slice(0,2);
+const tier  = mmr => TIERS.find(t=>mmr>=t.min)||TIERS[4];
+const safeWr = p => (p.wins+p.losses)===0 ? 0 : Math.round((p.wins/(p.wins+p.losses))*100);
+const mmrPct = mmr => {
+  const t=tier(mmr),idx=TIERS.indexOf(t),next=TIERS[idx-1];
+  const max=next?next.min:t.min+600;
+  const range=max-t.min; if(range<=0) return 100;
+  return Math.min(100,Math.round(((mmr-t.min)/range)*100));
+};
+const rc = (p,rank) => {
+  const d=p.prevRank-rank;
+  return d>0?`<span class="rc up">▲${d}</span>`:d<0?`<span class="rc dn">▼${Math.abs(d)}</span>`:`<span class="rc eq">—</span>`;
+};
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtTime(h,m){const ampm=h>=12?'PM':'AM',hh=h%12||12;return `${hh}:${pad2(m)} ${ampm}`;}
+function setSheetStatus(msg,type='info'){
+  const el=document.getElementById('sheetStatus');
+  if(!el) return;
+  const colors={info:'#6e6e6e',ok:'#4ade80',err:'#e03535',loading:'#f59e0b'};
+  el.textContent=msg;
+  el.style.color=colors[type]||colors.info;
 }
 
-// ── CONFIG — Supabase + localStorage fallback ──────────────────────────────────
-function saveCfgLocal() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+// ── SUPABASE HELPERS ─────────────────────────────────────────────────────
+function sbH(extra){
+  return {'Content-Type':'application/json','apikey':SB_KEY,
+          'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation',...extra};
+}
+async function sbGet(table,q=''){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}${q}`,{headers:sbH({'Prefer':''})});
+    return r.ok?await r.json():null;}catch{return null;}
+}
+async function sbPost(table,body){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:sbH(),body:JSON.stringify(body)});
+    return r.ok?await r.json():null;}catch{return null;}
+}
+async function sbPatch(table,q,body){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}${q}`,{method:'PATCH',headers:sbH(),body:JSON.stringify(body)});
+    return r.ok?await r.json():null;}catch{return null;}
+}
 
-async function saveCfg() {
+// ── CONFIG: localStorage + Supabase ──────────────────────────────────────
+function saveCfgLocal(){ localStorage.setItem(CFG_KEY,JSON.stringify(cfg)); }
+
+async function saveCfg(){
   saveCfgLocal();
-  // Save to Supabase config table (row id=1 always)
-  const { sheetUrlSession, sheetUrlLB, ...rest } = cfg; // keep URLs local only
-  await sbPatch('config', '?id=eq.1', { data: rest, updated_at: new Date().toISOString() });
+  const {sheetUrlSession,sheetUrlLB,...rest}=cfg; // don't push URLs to Supabase
+  await sbPatch('config','?id=eq.1',{data:rest,updated_at:new Date().toISOString()});
 }
 
-async function loadCfg() {
-  // 1. Load localStorage immediately (instant, no flicker)
-  try {
-    const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
-    cfg = { ...CFG_DEFAULTS, ...saved };
-  } catch(e) { cfg = { ...CFG_DEFAULTS }; }
-  document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
+async function loadCfg(){
+  // 1. localStorage first — instant render
+  try{const s=JSON.parse(localStorage.getItem(CFG_KEY)||'{}');cfg={...CFG_DEFAULTS,...s};}
+  catch{cfg={...CFG_DEFAULTS};}
+  document.getElementById('seasonLbl').textContent=cfg.season||'Season 1';
 
-  // 2. Try Supabase (authoritative source)
-  const rows = await sbGet('config', '?id=eq.1&select=data');
-  if (rows && rows[0] && rows[0].data && Object.keys(rows[0].data).length) {
-    // Merge Supabase data but keep sheet URLs from localStorage (not stored in SB)
-    const remote = rows[0].data;
-    cfg = { ...CFG_DEFAULTS, ...remote,
-      sheetUrlSession: cfg.sheetUrlSession,
-      sheetUrlLB:      cfg.sheetUrlLB
-    };
+  // 2. Supabase override
+  const rows=await sbGet('config','?id=eq.1&select=data');
+  if(rows&&rows[0]&&rows[0].data&&Object.keys(rows[0].data).length){
+    cfg={...CFG_DEFAULTS,...rows[0].data,
+      sheetUrlSession:cfg.sheetUrlSession,
+      sheetUrlLB:cfg.sheetUrlLB};
     saveCfgLocal();
-    document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
+    document.getElementById('seasonLbl').textContent=cfg.season||'Season 1';
     tick();
   }
 }
 
-// ── BULLETIN POSTS — Supabase + localStorage fallback ─────────────────────────
-let bulletinPosts = [];
+// ── BULLETIN POSTS: localStorage + Supabase ──────────────────────────────
+let bulletinPosts=[];
+function savePostsLocal(){localStorage.setItem('wg_posts',JSON.stringify(bulletinPosts));}
 
-function savePostsLocal() { localStorage.setItem('wg_posts', JSON.stringify(bulletinPosts)); }
-
-async function loadPosts() {
-  // 1. Load localStorage immediately
-  try { bulletinPosts = JSON.parse(localStorage.getItem('wg_posts') || '[]'); } catch(e) { bulletinPosts = []; }
+async function loadPosts(){
+  // 1. localStorage immediately
+  try{bulletinPosts=JSON.parse(localStorage.getItem('wg_posts')||'[]');}catch{bulletinPosts=[];}
   renderBulletin();
-
-  // 2. Load from Supabase (authoritative)
-  const rows = await sbGet('posts', '?select=id,label,msg,urgent,created_at&order=created_at.asc');
-  if (rows !== null) {
-    bulletinPosts = rows.map(r => ({
-      id:     r.id,
-      label:  r.label,
-      msg:    r.msg,
-      urgent: r.urgent,
-      date:   new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+  // 2. Supabase override
+  const rows=await sbGet('posts','?select=id,label,msg,urgent,created_at&order=created_at.asc');
+  if(rows!==null){
+    bulletinPosts=rows.map(r=>({
+      id:r.id,label:r.label,msg:r.msg,urgent:r.urgent,
+      date:new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
     }));
     savePostsLocal();
     renderBulletin();
   }
 }
 
-async function savePosts(post) {
-  // Insert single new post to Supabase
-  const result = await sbPost('posts', {
-    label:  post.label,
-    msg:    post.msg,
-    urgent: post.urgent
-  });
-  if (result && result[0]) {
-    // Add the Supabase-assigned id and formatted date
-    post.id   = result[0].id;
-    post.date = new Date(result[0].created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+async function savePost(post){
+  const result=await sbPost('posts',{label:post.label,msg:post.msg,urgent:post.urgent});
+  if(result&&result[0]){
+    post.id=result[0].id;
+    post.date=new Date(result[0].created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  } else {
+    post.date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   }
   bulletinPosts.push(post);
   savePostsLocal();
   renderBulletin();
 }
-function renderBulletin() {
-  const el = document.getElementById('bulletinPosts');
+
+function renderBulletin(){
+  const el=document.getElementById('bulletinPosts');
+  if(!el) return;
   if(!bulletinPosts.length){
-    el.innerHTML = '<div class="bulletin-empty">No posts yet. Admin can post updates here.</div>';
+    el.innerHTML='<div class="bulletin-empty">No posts yet. Admin can post updates here.</div>';
     return;
   }
-  el.innerHTML = [...bulletinPosts].reverse().map(p=>`
+  el.innerHTML=[...bulletinPosts].reverse().map(p=>`
     <div class="bpost${p.urgent?' urgent':''}">
       <div class="bpost-meta">
         <div class="bpost-label">
           ${p.urgent?'🚨':'📌'} ${escHtml(p.label||'Notice')}
           ${p.urgent?'<span class="bpost-urgent-badge">URGENT</span>':''}
         </div>
-        <div class="bpost-date">${p.date}</div>
+        <div class="bpost-date">${p.date||''}</div>
       </div>
       <div class="bpost-msg">${escHtml(p.msg)}</div>
     </div>`).join('');
 }
-function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── LIVE DATA (populated from Google Sheets or fallback to mock) ───────────────
-let LB = [];
-let SESSION = [];
-
-// ── MOCK FALLBACK (shown when no sheet URL configured) ────────────────────────
-const MOCK_LB = [
-  { name:'Marcus T.', mmr:2180, prevRank:2, wins:48, losses:12, lastPlayed:'Jun 14', duo:'Ryan K.',   streak:5, tier:'diamond'  },
-  { name:'Ryan K.',   mmr:2050, prevRank:1, wins:41, losses:14, lastPlayed:'Jun 14', duo:'Marcus T.', streak:2, tier:'diamond'  },
-  { name:'Jess L.',   mmr:1890, prevRank:3, wins:37, losses:15, lastPlayed:'Jun 7',  duo:'Sam P.',    streak:0, tier:'platinum' },
-  { name:'Sam P.',    mmr:1740, prevRank:5, wins:33, losses:16, lastPlayed:'Jun 14', duo:'Jess L.',   streak:3, tier:'platinum' },
-  { name:'Leo V.',    mmr:1680, prevRank:4, wins:29, losses:18, lastPlayed:'Jun 7',  duo:'Nico R.',   streak:0, tier:'gold'     },
-  { name:'Nico R.',   mmr:1590, prevRank:6, wins:27, losses:20, lastPlayed:'Jun 14', duo:'Leo V.',    streak:1, tier:'gold'     },
-  { name:'Priya M.',  mmr:1420, prevRank:8, wins:24, losses:22, lastPlayed:'Jun 7',  duo:'Dana W.',   streak:4, tier:'gold'     },
-  { name:'Dana W.',   mmr:1310, prevRank:7, wins:20, losses:24, lastPlayed:'Jun 14', duo:'Priya M.',  streak:0, tier:'silver'   },
-  { name:'Kai T.',    mmr:1190, prevRank:9, wins:18, losses:25, lastPlayed:'Jun 7',  duo:'Marc B.',   streak:0, tier:'silver'   },
-  { name:'Marc B.',   mmr:1080, prevRank:10,wins:15, losses:27, lastPlayed:'Jun 1',  duo:'Kai T.',    streak:0, tier:'silver'   },
-  { name:'Tina F.',   mmr:950,  prevRank:12,wins:12, losses:30, lastPlayed:'Jun 7',  duo:'Josh A.',   streak:2, tier:'bronze'   },
-  { name:'Josh A.',   mmr:880,  prevRank:11,wins:10, losses:28, lastPlayed:'Jun 14', duo:'Tina F.',   streak:0, tier:'bronze'   },
-];
-const MOCK_SESSION = [
-  { name:'Marcus T.', status:'confirmed' },{ name:'Ryan K.',  status:'confirmed' },
-  { name:'Jess L.',   status:'confirmed' },{ name:'Sam P.',   status:'confirmed' },
-  { name:'Leo V.',    status:'confirmed' },{ name:'Nico R.',  status:'confirmed' },
-  { name:'Priya M.',  status:'confirmed' },{ name:'Dana W.',  status:'confirmed' },
-  { name:'Kai T.',    status:'confirmed' },{ name:'Marc B.',  status:'confirmed' },
-  { name:'Tina F.',   status:'tentative' },{ name:'Josh A.',  status:'tentative' },
-  { name:'Zara Q.',   status:'tentative' },{ name:'Ben O.',   status:'tentative' },
-  { name:'Lena K.',   status:'out'       },{ name:'Chris P.', status:'out'       },
-];
-
-// ── CSV PARSER ────────────────────────────────────────────────────────────────
-function parseCSV(text) {
-  const lines = text.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
-  return lines.slice(1).map(line => {
-    // Handle quoted fields containing commas
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let ch of line) {
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else cur += ch;
+// ── CSV PARSER ───────────────────────────────────────────────────────────
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line=>{
+    const cols=[]; let cur='',inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ;}
+      else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
+      else cur+=ch;
     }
     cols.push(cur.trim());
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim(); });
+    const obj={};
+    headers.forEach((h,i)=>{obj[h]=(cols[i]||'').replace(/^"|"$/g,'').trim();});
     return obj;
-  }).filter(r => r[headers[0]]); // skip empty rows
+  }).filter(r=>r[headers[0]]);
 }
 
-// ── GOOGLE SHEETS FETCH ───────────────────────────────────────────────────────
-// Uses a CORS proxy as fallback since Google Sheets blocks direct fetch from
-// file:// and some hosted origins
-async function fetchCSV(url) {
-  if (!url || !url.includes('docs.google.com')) return null;
-  const u = url.includes('output=csv') ? url : url + (url.includes('?') ? '&' : '?') + 'output=csv';
+// ── GOOGLE SHEETS FETCH via Supabase Edge Function ───────────────────────
+async function fetchCSV(url){
+  if(!url||!url.includes('docs.google.com')) return null;
+  const u=url.includes('output=csv')?url:url+(url.includes('?')?'&':'?')+'output=csv';
 
-  // 1. Try via Supabase Edge Function
-  console.log('[fetchCSV] Trying Edge Function…');
-  try {
-    const r = await fetch(`${SB_URL}/functions/v1/fetch-csv`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_KEY },
-      body: JSON.stringify({ url: u })
+  // Primary: Supabase Edge Function (server-side, no CORS issues)
+  try{
+    const r=await fetch(`${SB_URL}/functions/v1/fetch-csv`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({url:u})
     });
-    console.log('[fetchCSV] Edge Function status:', r.status);
-    if (r.ok) {
-      const text = await r.text();
-      console.log('[fetchCSV] Edge Function got text, length:', text.length, '| preview:', text.slice(0,80));
-      if (text.includes(',')) return text;
-      console.warn('[fetchCSV] Edge Function response has no commas — not valid CSV');
-    } else {
-      const err = await r.text();
-      console.warn('[fetchCSV] Edge Function error body:', err);
+    if(r.ok){
+      const text=await r.text();
+      if(text.length>10&&text.includes(',')) return text;
     }
-  } catch(e) { console.warn('[fetchCSV] Edge Function exception:', e.message); }
+  }catch(e){console.warn('[fetchCSV] Edge fn error:',e.message);}
 
-  // 2. Direct fetch
-  console.log('[fetchCSV] Trying direct fetch…');
-  try {
-    const r = await fetch(u, { cache: 'no-store' });
-    console.log('[fetchCSV] Direct fetch status:', r.status);
-    if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
-  } catch(e) { console.warn('[fetchCSV] Direct fetch exception:', e.message); }
+  // Fallback 1: direct (works on localhost / some hosts)
+  try{
+    const r=await fetch(u,{cache:'no-store'});
+    if(r.ok){const t=await r.text();if(t.includes(',')) return t;}
+  }catch{}
 
-  // 3. corsproxy.io
-  console.log('[fetchCSV] Trying corsproxy.io…');
-  try {
-    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(u), { cache: 'no-store' });
-    console.log('[fetchCSV] corsproxy status:', r.status);
-    if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
-  } catch(e) { console.warn('[fetchCSV] corsproxy exception:', e.message); }
+  // Fallback 2: corsproxy.io
+  try{
+    const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(u),{cache:'no-store'});
+    if(r.ok){const t=await r.text();if(t.includes(',')) return t;}
+  }catch{}
 
-  console.error('[fetchCSV] All methods failed for URL:', u);
   return null;
 }
 
-function setSheetStatus(msg, type = 'info') {
-  const el = document.getElementById('sheetStatus');
-  if (!el) return;
-  const colors = { info: '#6e6e6e', ok: '#4ade80', err: '#e03535', loading: '#f59e0b' };
-  el.textContent = msg;
-  el.style.color = colors[type] || colors.info;
-}
+async function loadSheetData(){
+  const sUrl=cfg.sheetUrlSession, lUrl=cfg.sheetUrlLB;
+  const hasS=sUrl&&sUrl.includes('docs.google.com');
+  const hasL=lUrl&&lUrl.includes('docs.google.com');
 
-async function loadSheetData() {
-  const sessionUrl = cfg.sheetUrlSession;
-  const lbUrl      = cfg.sheetUrlLB;
-  const hasSession = sessionUrl && sessionUrl.includes('docs.google.com');
-  const hasLB      = lbUrl      && lbUrl.includes('docs.google.com');
-
-  if (!hasSession && !hasLB) {
-    LB      = MOCK_LB;
-    SESSION = MOCK_SESSION;
-    setSheetStatus('Using sample data — add Sheet URLs in Admin to load real data', 'info');
-    renderAll();
-    return;
+  if(!hasS&&!hasL){
+    LB=[...MOCK_LB]; SESSION=[...MOCK_SESSION];
+    setSheetStatus('Using sample data — add Sheet URLs in Admin to load real data','info');
+    renderAll(); return;
   }
 
-  setSheetStatus('⏳ Loading from Google Sheets…', 'loading');
+  setSheetStatus('⏳ Syncing with Google Sheets…','loading');
+  let sOk=false, lOk=false;
 
-  let sessionOk = false, lbOk = false;
-
-  if (hasSession) {
-    const csv = await fetchCSV(sessionUrl);
-    if (csv) {
-      const rows = parseCSV(csv);
-      const valid = rows.filter(r => r.name && ['confirmed','tentative','out'].includes(r.status?.toLowerCase()));
-      if (valid.length) {
-        SESSION = valid.map(r => ({ name: r.name, status: r.status.toLowerCase() }));
-        sessionOk = true;
+  if(hasS){
+    const csv=await fetchCSV(sUrl);
+    if(csv){
+      const rows=parseCSV(csv);
+      const valid=rows.filter(r=>r.name&&['confirmed','tentative','out'].includes((r.status||'').toLowerCase()));
+      if(valid.length){
+        SESSION=valid.map(r=>({name:r.name.trim(),status:r.status.toLowerCase().trim()}));
+        sOk=true;
       }
     }
   }
-  if (!sessionOk) SESSION = MOCK_SESSION;
+  if(!sOk) SESSION=[...MOCK_SESSION];
 
-  if (hasLB) {
-    const csv = await fetchCSV(lbUrl);
-    if (csv) {
-      const rows = parseCSV(csv);
-      const valid = rows.filter(r => r.name && r.mmr);
-      if (valid.length) {
-        LB = valid.map(r => ({
-          name:       r.name,
-          mmr:        parseInt(r.mmr)       || 0,
-          prevRank:   parseInt(r.prevrank)  || parseInt(r.prevRank) || 0,
-          wins:       parseInt(r.wins)      || 0,
-          losses:     parseInt(r.losses)    || 0,
-          lastPlayed: r.lastplayed          || r.lastPlayed || '—',
-          duo:        r.duo                 || '—',
-          streak:     parseInt(r.streak)    || 0,
-          tier:       (r.tier              || 'bronze').toLowerCase(),
-        })).sort((a,b) => b.mmr - a.mmr);
-        lbOk = true;
+  if(hasL){
+    const csv=await fetchCSV(lUrl);
+    if(csv){
+      const rows=parseCSV(csv);
+      const valid=rows.filter(r=>r.name&&r.mmr);
+      if(valid.length){
+        LB=valid.map(r=>({
+          name:      r.name.trim(),
+          mmr:       parseInt(r.mmr)||0,
+          prevRank:  parseInt(r.prevrank||r.prevRank)||0,
+          wins:      parseInt(r.wins)||0,
+          losses:    parseInt(r.losses)||0,
+          lastPlayed:r.lastplayed||r.lastPlayed||'—',
+          duo:       r.duo||'—',
+          streak:    parseInt(r.streak)||0,
+          tier:      (r.tier||'bronze').toLowerCase().trim(),
+        })).sort((a,b)=>b.mmr-a.mmr);
+        lOk=true;
       }
     }
   }
-  if (!lbOk) LB = MOCK_LB;
+  if(!lOk) LB=[...MOCK_LB];
 
-  if (sessionOk && lbOk)
-    setSheetStatus(`✅ Synced from Google Sheets — ${SESSION.length} players, ${LB.length} on leaderboard`, 'ok');
-  else if (sessionOk || lbOk)
-    setSheetStatus(`⚠️ Partial sync — ${sessionOk?'session ✅':'session ❌'} · ${lbOk?'leaderboard ✅':'leaderboard ❌'}`, 'err');
+  if(sOk&&lOk)
+    setSheetStatus(`✅ Synced — ${SESSION.length} players · ${LB.length} on leaderboard`,'ok');
+  else if(sOk||lOk)
+    setSheetStatus(`⚠️ Partial — session:${sOk?'✅':'❌'} leaderboard:${lOk?'✅':'❌'}`,'err');
   else
-    setSheetStatus('❌ Could not reach Google Sheets — check URLs in Admin. Showing sample data.', 'err');
+    setSheetStatus('❌ Could not reach Google Sheets. Showing sample data.','err');
 
   renderAll();
 }
 
-function renderAll() {
-  renderSession();
-  renderLB();
-  renderStats();
-}
-const TIERS = [
-  { name:'Diamond',  min:2000, cls:'t-diamond',  icon:'💎' },
-  { name:'Platinum', min:1600, cls:'t-platinum',  icon:'🔷' },
-  { name:'Gold',     min:1200, cls:'t-gold',      icon:'🥇' },
-  { name:'Silver',   min:900,  cls:'t-silver',    icon:'🥈' },
-  { name:'Bronze',   min:0,    cls:'t-bronze',    icon:'🥉' },
-];
+function renderAll(){renderSession();renderLB();renderStats();}
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-const ini = n => n.split(' ').map(x=>x[0]).join('').slice(0,2);
-const tier = mmr => TIERS.find(t=>mmr>=t.min)||TIERS[4];
-const wr = p => Math.round((p.wins/(p.wins+p.losses))*100);
-const mmrPct = mmr => {
-  const t=tier(mmr),idx=TIERS.indexOf(t),next=TIERS[idx-1];
-  const max=next?next.min:t.min+600;
-  return Math.min(100,Math.round(((mmr-t.min)/(max-t.min))*100));
-};
-const rc = (p,rank) => {
-  const d=p.prevRank-rank;
-  return d>0?`<span class="rc up">▲${d}</span>`:d<0?`<span class="rc dn">▼${Math.abs(d)}</span>`:`<span class="rc eq">—</span>`;
-};
-
-// ── SESSION ───────────────────────────────────────────────────────────────────
+// ── SESSION ──────────────────────────────────────────────────────────────
 let activeFilter='coming';
 function setFilter(f,btn){
   activeFilter=f;
@@ -1030,6 +953,7 @@ function setFilter(f,btn){
   renderSession();
 }
 function renderSession(){
+  if(!SESSION.length) return;
   const conf=SESSION.filter(p=>p.status==='confirmed');
   const tent=SESSION.filter(p=>p.status==='tentative');
   const out =SESSION.filter(p=>p.status==='out');
@@ -1038,16 +962,18 @@ function renderSession(){
   document.getElementById('cntOut').textContent=out.length;
   document.getElementById('slotN').textContent=conf.length;
   document.getElementById('slotMax').textContent=cfg.maxSlots;
-  document.getElementById('slotFill').style.width=`${(conf.length/cfg.maxSlots)*100}%`;
-  // Home summary
+  document.getElementById('slotFill').style.width=`${Math.min(100,(conf.length/cfg.maxSlots)*100)}%`;
   document.getElementById('hCntConf').textContent=conf.length;
   document.getElementById('hCntTent').textContent=tent.length;
   document.getElementById('hCntLeft').textContent=Math.max(0,cfg.maxSlots-conf.length);
   document.getElementById('hSlotN').textContent=conf.length;
   document.getElementById('hSlotMax').textContent=cfg.maxSlots;
-  document.getElementById('hSlotFill').style.width=`${(conf.length/cfg.maxSlots)*100}%`;
+  document.getElementById('hSlotFill').style.width=`${Math.min(100,(conf.length/cfg.maxSlots)*100)}%`;
 
-  const list=activeFilter==='coming'?[...conf,...tent]:activeFilter==='confirmed'?conf:activeFilter==='tentative'?tent:activeFilter==='out'?out:SESSION;
+  const list=activeFilter==='coming'?[...conf,...tent]
+    :activeFilter==='confirmed'?conf
+    :activeFilter==='tentative'?tent
+    :activeFilter==='out'?out:SESSION;
   const lbl={confirmed:'✅ Confirmed',tentative:'⏳ Maybe',out:'❌ Out'};
   const g=document.getElementById('playerGrid');
   if(!list.length){g.innerHTML='<div class="empty"><span class="empty-i">🏸</span>No players here</div>';return;}
@@ -1055,27 +981,33 @@ function renderSession(){
     const lb=LB.find(l=>l.name===p.name),t=lb?tier(lb.mmr):null;
     return `<div class="pcard ${p.status}">
       <div class="pav">${ini(p.name)}</div>
-      <div class="pname">${p.name}</div>
+      <div class="pname">${escHtml(p.name)}</div>
       ${t?`<div class="ptier ${t.cls}">${t.icon} ${t.name}</div>`:''}
       <div class="pstatus">${lbl[p.status]}</div>
     </div>`;
   }).join('');
 }
 
-// ── LEADERBOARD ───────────────────────────────────────────────────────────────
+// ── LEADERBOARD ──────────────────────────────────────────────────────────
 function renderLB(){
+  if(!LB.length){
+    document.getElementById('podRow').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:12px">No leaderboard data yet</div>';
+    document.getElementById('lbBody').innerHTML='';
+    return;
+  }
   const icons=['🥇','🥈','🥉'],cls=['p1','p2','p3'];
   document.getElementById('podRow').innerHTML=LB.slice(0,3).map((p,i)=>{
-    const t=tier(p.mmr),pct=mmrPct(p.mmr),s=p.streak>=3?`<span class="spill">🔥${p.streak}</span>`:'';
+    const t=tier(p.mmr),pct=mmrPct(p.mmr),w=safeWr(p);
+    const s=p.streak>=3?`<span class="spill">🔥${p.streak}</span>`:'';
     return `<div class="pod ${cls[i]}">
       <span class="pod-rank">${icons[i]}</span>
       <div class="pod-av">${ini(p.name)}</div>
-      <div class="pod-name">${p.name}${s}</div>
+      <div class="pod-name">${escHtml(p.name)}${s}</div>
       <div class="ptier ${t.cls}" style="margin:4px auto">${t.icon} ${t.name}</div>
       <div class="pod-mmr">${p.mmr} <span>MMR</span></div>
       <div class="mmr-bar"><div class="mmr-f" style="width:${pct}%"></div></div>
-      <div class="pod-sub">${p.wins}W ${p.losses}L · ${wr(p)}%</div>
-      <div class="pod-duo">🤝 <strong>${p.duo}</strong></div>
+      <div class="pod-sub">${p.wins}W ${p.losses}L · ${w}%</div>
+      <div class="pod-duo">🤝 <strong>${escHtml(p.duo)}</strong></div>
     </div>`;
   }).join('');
   document.getElementById('lbBody').innerHTML=LB.slice(3).map((p,i)=>{
@@ -1083,54 +1015,57 @@ function renderLB(){
     return `<div class="lbr">
       <div class="lb-rank">${rank} ${rc(p,rank)}</div>
       <div class="lb-pl"><div class="lbav">${ini(p.name)}</div>
-        <div><div class="lb-name">${p.name}${s}</div>
+        <div><div class="lb-name">${escHtml(p.name)}${s}</div>
         <div class="ptier ${t.cls}" style="font-size:8px;padding:1px 6px;margin-top:3px">${t.icon} ${t.name}</div></div>
       </div>
       <div class="lb-mmr">${p.mmr}</div>
       <div class="lb-wl"><span class="g">${p.wins}</span>/${p.losses}</div>
-      <div class="lb-duo">${p.duo}</div>
+      <div class="lb-duo">${escHtml(p.duo)}</div>
     </div>`;
   }).join('');
 }
 
-// ── STATS ─────────────────────────────────────────────────────────────────────
+// ── STATS ────────────────────────────────────────────────────────────────
 function renderStats(){
+  if(!LB.length){
+    document.getElementById('statCards').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:20px">No data yet</div>';
+    document.getElementById('wrList').innerHTML='';
+    document.getElementById('duoList').innerHTML='';
+    return;
+  }
   const total=LB.reduce((a,p)=>a+p.wins+p.losses,0)/2;
-  const topS=LB.reduce((a,b)=>a.streak>b.streak?a:b);
+  const topS=LB.reduce((a,b)=>a.streak>b.streak?a:b,LB[0]);
   document.getElementById('statCards').innerHTML=`
     <div class="sc"><div class="sc-lbl">Total Players</div><div class="sc-val">${LB.length}</div><div class="sc-sub">on leaderboard</div></div>
     <div class="sc"><div class="sc-lbl">Games Played</div><div class="sc-val">${Math.round(total)}</div><div class="sc-sub">this season</div></div>
-    <div class="sc"><div class="sc-lbl">Top MMR</div><div class="sc-val">${LB[0].mmr}</div><div class="sc-sub">${LB[0].name}</div></div>
-    <div class="sc"><div class="sc-lbl">Hot Streak 🔥</div><div class="sc-val">${topS.streak}</div><div class="sc-sub">${topS.name}</div></div>`;
-  document.getElementById('wrList').innerHTML=[...LB].sort((a,b)=>wr(b)-wr(a)).map((p,i)=>{
-    const w=wr(p);
+    <div class="sc"><div class="sc-lbl">Top MMR</div><div class="sc-val">${LB[0].mmr}</div><div class="sc-sub">${escHtml(LB[0].name)}</div></div>
+    <div class="sc"><div class="sc-lbl">Hot Streak 🔥</div><div class="sc-val">${topS.streak}</div><div class="sc-sub">${escHtml(topS.name)}</div></div>`;
+  document.getElementById('wrList').innerHTML=[...LB].sort((a,b)=>safeWr(b)-safeWr(a)).map((p,i)=>{
+    const w=safeWr(p);
     return `<div class="ritem"><div class="ri-idx">${i+1}</div><div class="lbav">${ini(p.name)}</div>
-      <div style="flex:1"><div style="font-size:12px;font-weight:600;margin-bottom:4px">${p.name}</div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600;margin-bottom:4px">${escHtml(p.name)}</div>
       <div style="height:3px;background:var(--card3);border-radius:99px;overflow:hidden">
       <div style="height:100%;width:${w}%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px"></div></div></div>
       <div style="font-family:var(--fm);font-size:12px;font-weight:500;color:var(--green)">${w}%</div></div>`;
   }).join('');
   const seen=new Set(),duos=[];
-  LB.forEach(p=>{const k=[p.name,p.duo].sort().join('|');if(!seen.has(k)){seen.add(k);duos.push([p.name,p.duo]);}});
+  LB.forEach(p=>{const k=[p.name,p.duo].sort().join('|');if(!seen.has(k)&&p.duo&&p.duo!=='—'){seen.add(k);duos.push([p.name,p.duo]);}});
   document.getElementById('duoList').innerHTML=duos.slice(0,6).map(([a,b])=>{
     const pa=LB.find(p=>p.name===a),pb=LB.find(p=>p.name===b);
-    const avg=pa&&pb?Math.round((wr(pa)+wr(pb))/2):null;
+    const avg=pa&&pb?Math.round((safeWr(pa)+safeWr(pb))/2):null;
     return `<div class="ritem">
       <div style="display:flex"><div class="lbav" style="z-index:1">${ini(a)}</div><div class="lbav" style="margin-left:-10px">${ini(b)}</div></div>
-      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">${a}</div><div style="font-size:11px;color:var(--purple)">${b}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">${escHtml(a)}</div><div style="font-size:11px;color:var(--purple)">${escHtml(b)}</div></div>
       ${avg!==null?`<div style="font-size:10px;color:var(--muted);font-family:var(--fm)">${avg}% avg WR</div>`:''}
     </div>`;
-  }).join('');
+  }).join('')||'<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">No duo data yet</div>';
 }
 
-// ── COUNTDOWN ─────────────────────────────────────────────────────────────────
+// ── COUNTDOWN ────────────────────────────────────────────────────────────
 function nextSessionDate(){
-  // If a specific calendar date is set, use it
   if(cfg.sessionDate){
-    const d=new Date(cfg.sessionDate+'T'+pad2(cfg.hourStart)+':'+pad2(cfg.minuteStart)+':00');
-    return d;
+    return new Date(cfg.sessionDate+'T'+pad2(cfg.hourStart)+':'+pad2(cfg.minuteStart)+':00');
   }
-  // Fallback: next occurrence of day-of-week
   const now=new Date(),d=new Date(now);
   d.setHours(cfg.hourStart,cfg.minuteStart,0,0);
   let diff=(cfg.day-now.getDay()+7)%7;
@@ -1138,30 +1073,17 @@ function nextSessionDate(){
   d.setDate(now.getDate()+diff);
   return d;
 }
-const pad2=n=>String(n).padStart(2,'0');
-function fmtTime(h,m){
-  const ampm=h>=12?'PM':'AM',hh=h%12||12;
-  return `${hh}:${pad2(m)} ${ampm}`;
-}
 function tick(){
   const now=new Date(),next=nextSessionDate(),ms=Math.max(0,next-now);
   const D=Math.floor(ms/86400000),H=Math.floor((ms%86400000)/3600000),
         M=Math.floor((ms%3600000)/60000),S=Math.floor((ms%60000)/1000);
-  // Session panel
-  document.getElementById('cdD').textContent=D;
-  document.getElementById('cdH').textContent=pad2(H);
-  document.getElementById('cdM').textContent=pad2(M);
-  document.getElementById('cdS').textContent=pad2(S);
-  // Home panel
-  document.getElementById('hcdD').textContent=D;
-  document.getElementById('hcdH').textContent=pad2(H);
-  document.getElementById('hcdM').textContent=pad2(M);
-  document.getElementById('hcdS').textContent=pad2(S);
-
+  ['cdD','hcdD'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=D;});
+  ['cdH','hcdH'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=pad2(H);});
+  ['cdM','hcdM'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=pad2(M);});
+  ['cdS','hcdS'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=pad2(S);});
   const DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   let dateLabel;
   if(cfg.sessionDate){
-    // Parse as local date to avoid timezone shift
     const [y,mo,dd]=cfg.sessionDate.split('-').map(Number);
     const nd=new Date(y,mo-1,dd);
     dateLabel=`${DN[nd.getDay()]}, ${nd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
@@ -1169,12 +1091,12 @@ function tick(){
     dateLabel=`${DN[cfg.day]}, ${next.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
   }
   const timeRange=`${fmtTime(cfg.hourStart,cfg.minuteStart)} – ${fmtTime(cfg.hourEnd,cfg.minuteEnd)}`;
-  document.getElementById('cdDate').textContent=dateLabel;
-  document.getElementById('cdTime').textContent=timeRange;
-  document.getElementById('hcdDate').textContent=`${dateLabel} · ${timeRange}`;
+  const cdDate=document.getElementById('cdDate'); if(cdDate) cdDate.textContent=dateLabel;
+  const cdTime=document.getElementById('cdTime'); if(cdTime) cdTime.textContent=timeRange;
+  const hcdDate=document.getElementById('hcdDate'); if(hcdDate) hcdDate.textContent=`${dateLabel} · ${timeRange}`;
 }
 
-// ── NAV ───────────────────────────────────────────────────────────────────────
+// ── NAVIGATION ───────────────────────────────────────────────────────────
 function nav(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
@@ -1182,14 +1104,14 @@ function nav(id,btn){
   btn.classList.add('active');
 }
 
-// ── ADMIN ─────────────────────────────────────────────────────────────────────
+// ── ADMIN ────────────────────────────────────────────────────────────────
 let adminOpen=false;
 function handleAdmin(){
   if(adminOpen){closeAdmin();return;}
   document.getElementById('pinOverlay').classList.add('open');
   document.querySelectorAll('.pin-i').forEach(i=>i.value='');
   document.getElementById('pinErr').textContent='';
-  document.querySelectorAll('.pin-i')[0].focus();
+  setTimeout(()=>document.querySelectorAll('.pin-i')[0].focus(),100);
 }
 function closeAdmin(){
   adminOpen=false;
@@ -1200,21 +1122,20 @@ function closePin(){document.getElementById('pinOverlay').classList.remove('open
 function submitPin(){
   const code=[...document.querySelectorAll('.pin-i')].map(i=>i.value).join('');
   if(code===ADMIN_PIN){
-    closePin();adminOpen=true;
+    closePin(); adminOpen=true;
     document.getElementById('adminPanel').classList.add('open');
     document.getElementById('adminBtn').classList.add('on');
-    document.getElementById('cfgDate').value=cfg.sessionDate||'';
-    document.getElementById('cfgTimeStart').value=`${pad2(cfg.hourStart)}:${pad2(cfg.minuteStart)}`;
-    document.getElementById('cfgTimeEnd').value=`${pad2(cfg.hourEnd)}:${pad2(cfg.minuteEnd)}`;
-    document.getElementById('cfgMax').value=cfg.maxSlots;
-    document.getElementById('cfgSeason').value=cfg.season;
-    document.getElementById('bPostLabel').value='';
-    document.getElementById('bPostMsg').value='';
-    document.getElementById('cfgSheetSession').value=cfg.sheetUrlSession||'';
-    document.getElementById('cfgSheetLB').value=cfg.sheetUrlLB||'';
-    if(cfg.sheetUrlSession||cfg.sheetUrlLB){
-      setSheetStatus('URLs saved — click ↻ Sync Now to reload data','info');
-    }
+    // Populate fields from cfg
+    const fv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+    fv('cfgDate',cfg.sessionDate||'');
+    fv('cfgTimeStart',`${pad2(cfg.hourStart)}:${pad2(cfg.minuteStart)}`);
+    fv('cfgTimeEnd',`${pad2(cfg.hourEnd)}:${pad2(cfg.minuteEnd)}`);
+    fv('cfgMax',cfg.maxSlots);
+    fv('cfgSeason',cfg.season);
+    fv('cfgSheetSession',cfg.sheetUrlSession||'');
+    fv('cfgSheetLB',cfg.sheetUrlLB||'');
+    fv('bPostLabel',''); fv('bPostMsg','');
+    setSheetStatus(cfg.sheetUrlSession||cfg.sheetUrlLB?'URLs loaded — click ↻ Sync Now to refresh data':'No sheet URLs saved yet','info');
   } else {
     document.getElementById('pinErr').textContent='Incorrect code. Try again.';
     document.querySelectorAll('.pin-i').forEach(i=>i.value='');
@@ -1222,70 +1143,74 @@ function submitPin(){
   }
 }
 async function saveConfig(){
-  cfg.sessionDate = document.getElementById('cfgDate').value;
-  if(cfg.sessionDate){
-    const [y,mo,dd]=cfg.sessionDate.split('-').map(Number);
-    cfg.day=new Date(y,mo-1,dd).getDay();
-  }
-  const [hs,ms]=document.getElementById('cfgTimeStart').value.split(':').map(Number);
-  const [he,me]=document.getElementById('cfgTimeEnd').value.split(':').map(Number);
-  cfg.hourStart=hs; cfg.minuteStart=ms;
-  cfg.hourEnd=he;   cfg.minuteEnd=me;
-  cfg.maxSlots=parseInt(document.getElementById('cfgMax').value)||32;
-  cfg.season=document.getElementById('cfgSeason').value||'Season 1';
-  cfg.sheetUrlSession=document.getElementById('cfgSheetSession').value.trim();
-  cfg.sheetUrlLB=document.getElementById('cfgSheetLB').value.trim();
+  const fv=id=>{const el=document.getElementById(id);return el?el.value:'';};
+  cfg.sessionDate=fv('cfgDate');
+  if(cfg.sessionDate){const [y,mo,dd]=cfg.sessionDate.split('-').map(Number);cfg.day=new Date(y,mo-1,dd).getDay();}
+  const ts=fv('cfgTimeStart').split(':').map(Number);
+  const te=fv('cfgTimeEnd').split(':').map(Number);
+  cfg.hourStart=ts[0]||19; cfg.minuteStart=ts[1]||0;
+  cfg.hourEnd=te[0]||22;   cfg.minuteEnd=te[1]||0;
+  cfg.maxSlots=parseInt(fv('cfgMax'))||32;
+  cfg.season=fv('cfgSeason')||'Season 1';
+  cfg.sheetUrlSession=fv('cfgSheetSession').trim();
+  cfg.sheetUrlLB=fv('cfgSheetLB').trim();
   document.getElementById('seasonLbl').textContent=cfg.season;
-
   showToast('Saving…');
-  await saveCfg(); // Supabase + localStorage
-
+  await saveCfg();
   // Bulletin post
-  const label=document.getElementById('bPostLabel').value.trim();
-  const msg=document.getElementById('bPostMsg').value.trim();
-  const urgent=document.getElementById('bPostUrgent').checked;
+  const label=fv('bPostLabel').trim(),msg=fv('bPostMsg').trim();
+  const urgentEl=document.getElementById('bPostUrgent');
+  const urgent=urgentEl?urgentEl.checked:false;
   if(msg){
-    const post = { label:label||'Notice', msg, urgent, date:'' };
-    await savePosts(post); // saves to Supabase + rerenders
-    document.getElementById('bPostLabel').value='';
-    document.getElementById('bPostMsg').value='';
-    document.getElementById('bPostUrgent').checked=false;
-    document.getElementById('urgentBox').classList.remove('urgentbox-checked');
+    await savePost({label:label||'Notice',msg,urgent,date:''});
+    const fv2=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+    fv2('bPostLabel',''); fv2('bPostMsg','');
+    if(urgentEl) urgentEl.checked=false;
+    const ub=document.getElementById('urgentBox');
+    if(ub) ub.classList.remove('urgentbox-checked');
   }
   tick(); renderSession();
-
+  showToast(msg?'Saved & posted ✓':'Settings saved ✓');
   if(cfg.sheetUrlSession||cfg.sheetUrlLB) loadSheetData();
-  else showToast(msg?'Saved & posted ✓':'Settings saved ✓');
 }
-
 async function syncNow(){
   setSheetStatus('⏳ Syncing…','loading');
   await loadSheetData();
   showToast('Synced ✓');
 }
 
-// Urgent checkbox visual
-document.getElementById('bPostUrgent').addEventListener('change',function(){
-  document.getElementById('urgentBox').classList.toggle('urgentbox-checked',this.checked);
-});
-
-// PIN auto-advance
+// ── PIN auto-advance ─────────────────────────────────────────────────────
 document.querySelectorAll('.pin-i').forEach((el,i,all)=>{
-  el.addEventListener('input',()=>{if(el.value&&i<all.length-1)all[i+1].focus();if(i===all.length-1&&el.value)submitPin();});
-  el.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!el.value&&i>0)all[i-1].focus();if(e.key==='Enter')submitPin();});
+  el.addEventListener('input',()=>{
+    if(el.value&&i<all.length-1) all[i+1].focus();
+    if(i===all.length-1&&el.value) submitPin();
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&!el.value&&i>0) all[i-1].focus();
+    if(e.key==='Enter') submitPin();
+  });
 });
 document.getElementById('pinOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closePin();});
 document.getElementById('gcashOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('gcashOverlay').classList.remove('open');});
 
-// ── GCASH COPY ────────────────────────────────────────────────────────────────
+// ── URGENT CHECKBOX ──────────────────────────────────────────────────────
+const urgentCb=document.getElementById('bPostUrgent');
+if(urgentCb) urgentCb.addEventListener('change',function(){
+  const ub=document.getElementById('urgentBox');
+  if(ub) ub.classList.toggle('urgentbox-checked',this.checked);
+});
+
+// ── GCASH ────────────────────────────────────────────────────────────────
 function copyGcash(){
-  navigator.clipboard.writeText('+639692867882').then(()=>showToast('GCash number copied! 💙')).catch(()=>{
-    document.getElementById('gcashNum').style.color='var(--green)';
-    setTimeout(()=>document.getElementById('gcashNum').style.color='',1500);
-  });
+  navigator.clipboard.writeText('+639692867882')
+    .then(()=>showToast('GCash number copied! 💙'))
+    .catch(()=>{
+      const el=document.getElementById('gcashNum');
+      if(el){el.style.color='var(--green)';setTimeout(()=>el.style.color='',1500);}
+    });
 }
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
+// ── THEME ────────────────────────────────────────────────────────────────
 function toggleTheme(){
   const l=document.body.classList.toggle('light');
   document.getElementById('themeBtn').textContent=l?'🌙':'☀️';
@@ -1296,22 +1221,25 @@ function toggleTheme(){
   if(t==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='🌙';}
 })();
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+// ── TOAST ────────────────────────────────────────────────────────────────
 let _tt;
 function showToast(msg){
   const el=document.getElementById('toast');
+  if(!el) return;
   el.innerHTML=`<div style="background:#1e1e1e;color:#f2f0ea;border:1px solid rgba(255,255,255,.1);padding:9px 18px;border-radius:22px;font-size:12px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.7)">${msg}</div>`;
-  el.style.opacity='1';clearTimeout(_tt);_tt=setTimeout(()=>el.style.opacity='0',2600);
+  el.style.opacity='1';
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>el.style.opacity='0',2600);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-(async () => {
+// ── INIT ─────────────────────────────────────────────────────────────────
+(async()=>{
   await loadCfg();
   await loadPosts();
   tick();
-  setInterval(tick, 1000);
+  setInterval(tick,1000);
   loadSheetData();
 })();
 </script>
 </body>
-</html
+</html>
