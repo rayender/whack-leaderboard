@@ -233,6 +233,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .bpost-acc-arrow{font-size:10px;transition:transform .2s}
 .bpost-acc-body .bpost{border-top:1px solid var(--border);opacity:.85}
 .bpost-acc-body .bpost:first-child{border-top:none}
+
+/* Manage posts list in admin */
+.mpost{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.mpost:last-child{border-bottom:none}
+.mpost-info{flex:1;min-width:0}
+.mpost-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px}
+.mpost-headline{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpost-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.mpost-date{font-size:9px;color:var(--muted2);font-family:var(--fm);margin-top:2px}
+.mpost-actions{display:flex;gap:6px;flex-shrink:0;margin-top:2px}
+.mpost-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);border:none;transition:all .15s}
+.mpost-edit{background:var(--card3);color:var(--text2)}.mpost-edit:hover{background:var(--border2);color:var(--text)}
+.mpost-del{background:var(--accent-dim);color:var(--accent)}.mpost-del:hover{background:var(--accent);color:#fff}
+
+/* Old posts popup modal */
+.old-posts-modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:0;width:calc(100% - 28px);max-width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.old-posts-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border2);flex-shrink:0}
+.old-posts-title{font-family:var(--fh);font-size:1.2rem;letter-spacing:1.5px;color:var(--text)}
+.old-posts-close{background:var(--card2);border:1px solid var(--border2);color:var(--muted);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s}
+.old-posts-close:hover{color:var(--text);border-color:var(--border3)}
+.old-posts-body{overflow-y:auto;padding:0;flex:1}
+.old-posts-body .bpost{border-bottom:1px solid var(--border)}
+.old-posts-body .bpost:last-child{border-bottom:none}
 .bpost-headline{font-family:var(--fh);font-size:1.4rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;line-height:1.2}
 .bpost-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;margin-top:10px;display:block}
 .bpost.urgent{background:rgba(224,53,53,.06);border-left:3px solid var(--accent);padding-left:11px}
@@ -471,8 +494,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         </label>
       </div>
     </div>
-    <div class="adm-note">💡 Posts appear on the Home board instantly. Urgent posts are highlighted in red. Add a new one anytime — previous posts stay until cleared.</div>
+    <div class="adm-note">💡 Posts appear on the Home board instantly. Urgent posts are highlighted in red. Only 1 latest + 5 old posts are kept — oldest auto-deleted when limit is reached.</div>
     <button class="adm-save" onclick="saveConfig()">Save & Post</button>
+    <!-- Manage existing posts -->
+    <div id="managePostsSection" style="margin-top:14px;display:none">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--fm);font-weight:600;margin-bottom:10px;padding-top:4px;border-top:1px solid var(--border2);padding-top:12px">📋 Manage Existing Posts</div>
+      <div id="managePostsList"></div>
+    </div>
   </div>
 
   <!-- ═══ HOME PANEL ═══ -->
@@ -554,6 +582,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
       </div>
       <div id="bulletinPosts">
         <div class="bulletin-empty">No posts yet. Admin can post updates here.</div>
+      </div>
+      <div id="oldPostsBtn" style="display:none;border-top:1px solid var(--border)">
+        <button onclick="openOldPosts()" style="width:100%;padding:11px 14px;background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:color .15s;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span>📋 View Past Bulletins</span>
+          <span style="font-size:9px">→</span>
+        </button>
       </div>
     </div>
 
@@ -688,6 +722,47 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 </div>
 
+<!-- OLD POSTS MODAL -->
+<div class="overlay" id="oldPostsOverlay">
+  <div class="old-posts-modal">
+    <div class="old-posts-header">
+      <div class="old-posts-title">📋 Past Bulletins</div>
+      <button class="old-posts-close" onclick="document.getElementById('oldPostsOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="old-posts-body" id="oldPostsBody">
+      <div class="bulletin-empty">No older posts.</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div class="overlay" id="editPostOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" style="font-size:1.2rem;margin-bottom:12px">✏️ Edit Post</div>
+    <input type="hidden" id="editPostId">
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
+      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none">
+    </div>
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
+      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
+    </div>
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
+      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
+    </div>
+    <div class="mactions">
+      <button class="mbtn sec" onclick="document.getElementById('editPostOverlay').classList.remove('open')">Cancel</button>
+      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <div class="bnav">
   <button class="bni active" onclick="nav('home',this)">
@@ -791,6 +866,10 @@ async function sbPatch(table,q,body){
   try{const r=await fetch(`${SB_URL}/rest/v1/${table}${q}`,{method:'PATCH',headers:sbH(),body:JSON.stringify(body)});
     return r.ok?await r.json():null;}catch{return null;}
 }
+async function sbDelete(table,q){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}${q}`,{method:'DELETE',headers:{...sbH(),'Prefer':''}});
+    return r.ok;}catch{return null;}
+}
 
 // ── CONFIG: localStorage + Supabase ──────────────────────────────────────
 function saveCfgLocal(){ localStorage.setItem(CFG_KEY,JSON.stringify(cfg)); }
@@ -888,60 +967,158 @@ async function savePost(post,imageFile){
   bulletinPosts.push(post);
   savePostsLocal();
   renderBulletin();
+  await trimOldPosts(); // keep max 6 posts
+}
+
+function postHTML(p){
+  return `<div class="bpost${p.urgent?' urgent':''}">
+    <div class="bpost-meta">
+      <div class="bpost-label">
+        ${p.urgent?'🚨':'📌'} ${escHtml(p.label||'Notice')}
+        ${p.urgent?'<span class="bpost-urgent-badge">URGENT</span>':''}
+      </div>
+      <div class="bpost-date">${p.date||''}</div>
+    </div>
+    ${p.headline?`<div class="bpost-headline">${escHtml(p.headline)}</div>`:''}
+    ${p.imageUrl?`<img class="bpost-img" src="${p.imageUrl}" alt="Post image" loading="lazy">`:''}
+    <div class="bpost-msg">${escHtml(p.msg).replace(/\n/g,'<br>')}</div>
+  </div>`;
 }
 
 function renderBulletin(){
   const el=document.getElementById('bulletinPosts');
   if(!el) return;
-  if(!bulletinPosts.length){
-    el.innerHTML='<div class="bulletin-empty">No posts yet. Admin can post updates here.</div>';
-    return;
-  }
 
   const sorted=[...bulletinPosts].reverse(); // newest first
   const latest=sorted[0];
-  const older=sorted.slice(1,6); // up to 5 old posts
+  const older=sorted.slice(1,6); // up to 5 old
 
-  function postHTML(p,collapsed=false){
-    const id='bpost_'+p.id;
-    return `<div class="bpost${p.urgent?' urgent':''}" id="${id}">
-      <div class="bpost-meta">
-        <div class="bpost-label">
-          ${p.urgent?'🚨':'📌'} ${escHtml(p.label||'Notice')}
-          ${p.urgent?'<span class="bpost-urgent-badge">URGENT</span>':''}
-        </div>
-        <div class="bpost-date">${p.date||''}</div>
-      </div>
-      ${p.headline?`<div class="bpost-headline">${escHtml(p.headline)}</div>`:''}
-      ${p.imageUrl?`<img class="bpost-img" src="${p.imageUrl}" alt="Post image" loading="lazy">`:''}
-      <div class="bpost-msg">${escHtml(p.msg).replace(/\n/g,'<br>')}</div>
-    </div>`;
+  if(!latest){
+    el.innerHTML='<div class="bulletin-empty">No posts yet. Admin can post updates here.</div>';
+    const ob=document.getElementById('oldPostsBtn');
+    if(ob) ob.style.display='none';
+    return;
   }
 
-  let html=postHTML(latest);
+  el.innerHTML=postHTML(latest);
 
-  if(older.length){
-    html+=`<div class="bpost-accordion">
-      <button class="bpost-acc-btn" onclick="toggleOldPosts(this)" aria-expanded="false">
-        <span>🗂 ${older.length} older post${older.length>1?'s':''}</span>
-        <span class="bpost-acc-arrow">▼</span>
-      </button>
-      <div class="bpost-acc-body" style="display:none">
-        ${older.map(p=>postHTML(p)).join('')}
-      </div>
-    </div>`;
-  }
+  // Show/hide "View Past Bulletins" button
+  const ob=document.getElementById('oldPostsBtn');
+  if(ob) ob.style.display=older.length?'block':'none';
 
-  el.innerHTML=html;
+  // Render admin manage list
+  renderManagePosts();
 }
 
-function toggleOldPosts(btn){
-  const body=btn.nextElementSibling;
-  const arrow=btn.querySelector('.bpost-acc-arrow');
-  const open=body.style.display==='none';
-  body.style.display=open?'block':'none';
-  arrow.textContent=open?'▲':'▼';
-  btn.setAttribute('aria-expanded',open);
+function renderManagePosts(){
+  const sec=document.getElementById('managePostsSection');
+  const list=document.getElementById('managePostsList');
+  if(!sec||!list) return;
+  if(!bulletinPosts.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  const sorted=[...bulletinPosts].reverse();
+  list.innerHTML=sorted.map((p,i)=>`
+    <div class="mpost">
+      <div class="mpost-info">
+        <div class="mpost-label">${p.urgent?'🚨 ':'📌 '}${escHtml(p.label||'Notice')}${i===0?' <span style="background:var(--accent-dim);color:var(--accent);font-size:8px;padding:1px 5px;border-radius:99px;margin-left:4px">LATEST</span>':''}</div>
+        ${p.headline?`<div class="mpost-headline">${escHtml(p.headline)}</div>`:''}
+        <div class="mpost-preview">${escHtml(p.msg).slice(0,60)}${p.msg.length>60?'…':''}</div>
+        <div class="mpost-date">${p.date||''}</div>
+      </div>
+      <div class="mpost-actions">
+        <button class="mpost-btn mpost-edit" onclick="openEditPost(${p.id})">✏️ Edit</button>
+        <button class="mpost-btn mpost-del" onclick="confirmDeletePost(${p.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function openOldPosts(){
+  const sorted=[...bulletinPosts].reverse();
+  const older=sorted.slice(1,6);
+  const body=document.getElementById('oldPostsBody');
+  if(!body) return;
+  if(!older.length){
+    body.innerHTML='<div class="bulletin-empty">No older posts yet.</div>';
+  } else {
+    body.innerHTML=older.map(p=>postHTML(p)).join('');
+  }
+  document.getElementById('oldPostsOverlay').classList.add('open');
+}
+document.getElementById('oldPostsOverlay').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('open');
+});
+
+function openEditPost(id){
+  const p=bulletinPosts.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('editPostId').value=id;
+  document.getElementById('editPostLabel').value=p.label||'';
+  document.getElementById('editPostHeadline').value=p.headline||'';
+  document.getElementById('editPostMsg').value=p.msg||'';
+  document.getElementById('editPostUrgent').checked=!!p.urgent;
+  document.getElementById('editPostOverlay').classList.add('open');
+}
+document.getElementById('editPostOverlay').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('open');
+});
+
+async function submitEditPost(){
+  const id=parseInt(document.getElementById('editPostId').value);
+  const label=document.getElementById('editPostLabel').value.trim();
+  const headline=document.getElementById('editPostHeadline').value.trim();
+  const msg=document.getElementById('editPostMsg').value.trim();
+  const urgent=document.getElementById('editPostUrgent').checked;
+  if(!msg){ showToast('Message cannot be empty'); return; }
+
+  // Update in Supabase
+  const result=await sbPatch('posts','?id=eq.'+id,{label:label||'Notice',headline,msg,urgent});
+  if(result!==null){
+    // Update local
+    const idx=bulletinPosts.findIndex(p=>p.id===id);
+    if(idx>=0) bulletinPosts[idx]={...bulletinPosts[idx],label:label||'Notice',headline,msg,urgent};
+    savePostsLocal();
+    renderBulletin();
+    document.getElementById('editPostOverlay').classList.remove('open');
+    showToast('Post updated ✓');
+  } else {
+    showToast('❌ Update failed — check console');
+  }
+}
+
+async function confirmDeletePost(id){
+  const p=bulletinPosts.find(x=>x.id===id);
+  if(!p) return;
+  const preview=(p.headline||p.msg||'').slice(0,40);
+  if(!confirm(`Delete this post?
+
+"${preview}…"
+
+This cannot be undone.`)) return;
+  await deletePost(id);
+}
+
+async function deletePost(id){
+  const ok=await sbDelete('posts','?id=eq.'+id);
+  if(ok||ok===null){
+    bulletinPosts=bulletinPosts.filter(p=>p.id!==id);
+    savePostsLocal();
+    renderBulletin();
+    showToast('Post deleted');
+  } else {
+    showToast('❌ Delete failed');
+  }
+}
+
+// Auto-trim: keep max 6 posts total (1 latest + 5 old), delete oldest beyond that
+async function trimOldPosts(){
+  if(bulletinPosts.length<=6) return;
+  const sorted=[...bulletinPosts].sort((a,b)=>a.id-b.id); // oldest first
+  const toDelete=sorted.slice(0,bulletinPosts.length-6);
+  for(const p of toDelete){
+    await sbDelete('posts','?id=eq.'+p.id);
+    bulletinPosts=bulletinPosts.filter(x=>x.id!==p.id);
+  }
+  savePostsLocal();
 }
 
 // ── CSV PARSER ───────────────────────────────────────────────────────────
@@ -1357,6 +1534,7 @@ function submitPin(){
     fv('cfgLocationUrl',cfg.locationUrl||'');
     fv('bPostLabel',''); fv('bPostMsg','');
     setSheetStatus(cfg.sheetUrlSession||cfg.sheetUrlLB?'URLs loaded — click ↻ Sync Now to refresh data':'No sheet URLs saved yet','info');
+    renderManagePosts(); // show existing posts in admin
   } else {
     document.getElementById('pinErr').textContent='Incorrect code. Try again.';
     document.querySelectorAll('.pin-i').forEach(i=>i.value='');
