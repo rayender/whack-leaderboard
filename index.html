@@ -226,7 +226,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .bpost-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
 .bpost-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px}
 .bpost-date{font-size:10px;color:var(--muted);font-family:var(--fm)}
-.bpost-msg{font-size:13px;color:var(--text2);line-height:1.5}
+.bpost-msg{font-size:15px;color:var(--text2);line-height:1.6}
+.bpost-headline{font-family:var(--fh);font-size:1.4rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;line-height:1.2}
+.bpost-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;margin-top:10px;display:block}
 .bpost.urgent{background:rgba(224,53,53,.06);border-left:3px solid var(--accent);padding-left:11px}
 .bpost.urgent .bpost-label{color:var(--accent)}
 .bpost-urgent-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(224,53,53,.25);padding:1px 6px;border-radius:99px;margin-left:6px;font-weight:700;letter-spacing:.5px}
@@ -419,11 +421,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
       <div class="adm-field full">
         <label>Post Label <span style="color:var(--muted2);font-size:9px">(optional — e.g. "Reminder", "Update")</span></label>
-        <input type="text" id="bPostLabel" placeholder="Notice">
+        <input type="text" id="bPostLabel" placeholder="Notice" maxlength="40">
       </div>
       <div class="adm-field full">
-        <label>Message</label>
-        <textarea id="bPostMsg" rows="3" placeholder="Type your message to the group here…"></textarea>
+        <label>Headline <span style="color:var(--muted2);font-size:9px">(optional — max 25 characters)</span></label>
+        <input type="text" id="bPostHeadline" placeholder="Big bold headline…" maxlength="25" style="font-weight:600;font-size:14px">
+        <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:4px;text-align:right"><span id="headlineCount">0</span>/25</div>
+      </div>
+      <div class="adm-field full">
+        <label>Message <span style="color:var(--muted2);font-size:9px">(up to 1,000 words)</span></label>
+        <textarea id="bPostMsg" rows="5" placeholder="Type your message to the group here…" style="min-height:100px"></textarea>
+        <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:4px;text-align:right"><span id="msgWordCount">0</span> words</div>
+      </div>
+      <div class="adm-field full">
+        <label>Photo <span style="color:var(--muted2);font-size:9px">(optional · JPG or PNG · square · 800×800px ideal · max 1MB)</span></label>
+        <input type="file" id="bPostPhoto" accept="image/jpeg,image/png" style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:12px;cursor:pointer;width:100%">
+        <div id="photoPreview" style="margin-top:8px;display:none">
+          <img id="photoPreviewImg" style="width:100%;max-width:200px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2)">
+          <div id="photoSizeWarn" style="font-size:10px;color:var(--accent);margin-top:4px;display:none">⚠️ Image is over 1MB — please use a smaller file</div>
+        </div>
       </div>
 
       <!-- Urgent checkbox -->
@@ -444,11 +460,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
   <!-- ═══ HOME PANEL ═══ -->
   <div class="panel active" id="panel-home">
 
-    <!-- Hype banner -->
-    <div class="hype-card">
-      <div class="hype-title">It's Smash Time! 🏸</div>
-      <div class="hype-sub">Get your racket ready — the next session is coming up. See you on the court!</div>
-      <button class="hype-cta" onclick="nav('session',document.querySelectorAll('.bni')[1])">View This Week's Players →</button>
+    <!-- Logo hero -->
+    <div style="text-align:center;padding:22px 16px 18px;background:var(--card);border:1px solid var(--border2);border-radius:14px;margin-bottom:12px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(139,26,26,0.18),transparent 70%);pointer-events:none"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">
+        <svg width="38" height="36" viewBox="0 0 29 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z" fill="#e03535"/>
+        </svg>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--text);line-height:1" class="lgt-fill-text">WHACK GROUP</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Badminton Community · UAE</div>
+      <div style="width:40px;height:2px;background:var(--accent);border-radius:99px;margin:0 auto"></div>
     </div>
 
     <!-- Countdown -->
@@ -472,9 +494,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div class="hslot-frac"><span id="hSlotN">0</span> confirmed / <span id="hSlotMax">32</span> max</div>
       </div>
       <div class="hslot-segs">
-        <div class="hslot-seg">
+        <div class="hslot-seg" onclick="nav('session',document.querySelectorAll('.bni')[1])" style="cursor:pointer;transition:transform .15s;user-select:none" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform=''">
           <span class="hslot-seg-n" style="color:var(--green)" id="hCntConf">0</span>
           <span class="hslot-seg-l">Coming</span>
+          <span style="font-size:8px;color:var(--accent);font-family:var(--fm);margin-top:2px;display:block;letter-spacing:.5px">TAP TO VIEW →</span>
         </div>
         <div class="hslot-seg">
           <span class="hslot-seg-n" style="color:var(--amber)" id="hCntTent">0</span>
@@ -491,9 +514,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     <!-- Bulletin board -->
     <div class="slbl">Admin Bulletin</div>
     <div class="bulletin" id="bulletinBoard">
-      <div class="bulletin-head">
-        <div class="bulletin-title">📌 Notice Board</div>
-        <div class="bulletin-tag">From the admin</div>
+      <div class="bulletin-head" style="text-align:center;padding:16px 14px">
+        <div class="bulletin-title" style="font-size:1.3rem;letter-spacing:2px;margin-bottom:4px">📌 NOTICE BOARD</div>
+        <div class="bulletin-tag" style="font-size:10px">From the admin</div>
       </div>
       <div id="bulletinPosts">
         <div class="bulletin-empty">No posts yet. Admin can post updates here.</div>
@@ -653,7 +676,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 // ══════════════════════════════════════════════════════════════════════════
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────
-const ADMIN_PIN = '091900';
+const ADMIN_PIN = '123456';
 const CFG_KEY   = 'wg_cfg';
 const SB_URL    = 'https://iweyxgakgqbunfzbrrgn.supabase.co';
 const SB_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3ZXl4Z2FrZ3FidW5memJycmduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjE1MjgsImV4cCI6MjA5MDYzNzUyOH0.uCOOa0IHUmbbgelBeGIBOVFL_fFqwLjABMaRsa-Kf4g';
@@ -765,7 +788,8 @@ async function loadPosts(){
   const rows=await sbGet('posts','?select=id,label,msg,urgent,created_at&order=created_at.asc');
   if(rows!==null){
     bulletinPosts=rows.map(r=>({
-      id:r.id,label:r.label,msg:r.msg,urgent:r.urgent,
+      id:r.id,label:r.label,headline:r.headline||'',msg:r.msg,urgent:r.urgent,
+      imageUrl:r.image_url||'',
       date:new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
     }));
     savePostsLocal();
@@ -773,12 +797,45 @@ async function loadPosts(){
   }
 }
 
-async function savePost(post){
-  const result=await sbPost('posts',{label:post.label,msg:post.msg,urgent:post.urgent});
+async function uploadBulletinImage(file){
+  if(!file) return null;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const filename=`post_${Date.now()}.${ext}`;
+  try{
+    const r=await fetch(`${SB_URL}/storage/v1/object/bulletin-images/${filename}`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body:file
+    });
+    if(r.ok){
+      return `${SB_URL}/storage/v1/object/public/bulletin-images/${filename}`;
+    }
+    console.warn('[IMG] Upload failed:',r.status,await r.text());
+    return null;
+  }catch(e){console.warn('[IMG] Upload error:',e.message);return null;}
+}
+
+async function savePost(post,imageFile){
+  // Upload image first if provided
+  let imageUrl='';
+  if(imageFile){
+    showToast('⏳ Uploading image…');
+    imageUrl=await uploadBulletinImage(imageFile)||'';
+  }
+  const result=await sbPost('posts',{
+    label:post.label,
+    headline:post.headline||'',
+    msg:post.msg,
+    urgent:post.urgent,
+    image_url:imageUrl
+  });
   if(result&&result[0]){
     post.id=result[0].id;
+    post.imageUrl=result[0].image_url||'';
+    post.headline=result[0].headline||'';
     post.date=new Date(result[0].created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   } else {
+    post.imageUrl=imageUrl;
     post.date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   }
   bulletinPosts.push(post);
@@ -802,7 +859,9 @@ function renderBulletin(){
         </div>
         <div class="bpost-date">${p.date||''}</div>
       </div>
-      <div class="bpost-msg">${escHtml(p.msg)}</div>
+      ${p.headline?`<div class="bpost-headline">${escHtml(p.headline)}</div>`:''}
+      ${p.imageUrl?`<img class="bpost-img" src="${p.imageUrl}" alt="Post image" loading="lazy">`:''}
+      <div class="bpost-msg">${escHtml(p.msg).replace(/\n/g,'<br>')}</div>
     </div>`).join('');
 }
 
@@ -1009,11 +1068,13 @@ function renderSession(){
   if(!list.length){g.innerHTML='<div class="empty"><span class="empty-i">🏸</span>No players here</div>';return;}
   g.innerHTML=list.map(p=>{
     const lb=LB.find(l=>l.name===p.name),t=lb?tier(lb.mmr):null;
+    const lp=lb&&lb.lastPlayed&&lb.lastPlayed!=='—'?lb.lastPlayed:null;
     return `<div class="pcard ${p.status}">
       <div class="pav">${ini(p.name)}</div>
       <div class="pname">${escHtml(p.name)}</div>
       ${t?`<div class="ptier ${t.cls}">${t.icon} ${t.name}</div>`:''}
       <div class="pstatus">${lbl[p.status]}</div>
+      ${lp?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm)">🗓 ${lp}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -1038,6 +1099,7 @@ function renderLB(){
       <div class="mmr-bar"><div class="mmr-f" style="width:${pct}%"></div></div>
       <div class="pod-sub">${p.wins}W ${p.losses}L · ${w}%</div>
       <div class="pod-duo">🤝 <strong>${escHtml(p.duo)}</strong></div>
+      ${p.lastPlayed&&p.lastPlayed!=='—'?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:3px">🗓 ${p.lastPlayed}</div>`:''}
     </div>`;
   }).join('');
   document.getElementById('lbBody').innerHTML=LB.slice(3).map((p,i)=>{
@@ -1050,7 +1112,10 @@ function renderLB(){
       </div>
       <div class="lb-mmr">${p.mmr}</div>
       <div class="lb-wl"><span class="g">${p.wins}</span>/${p.losses}</div>
-      <div class="lb-duo">${escHtml(p.duo)}</div>
+      <div class="lb-duo">
+        <div>${escHtml(p.duo)}</div>
+        ${p.lastPlayed&&p.lastPlayed!=='—'?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:2px">🗓 ${p.lastPlayed}</div>`:''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -1073,9 +1138,14 @@ function renderStats(){
   document.getElementById('wrList').innerHTML=[...LB].sort((a,b)=>safeWr(b)-safeWr(a)).map((p,i)=>{
     const w=safeWr(p);
     return `<div class="ritem"><div class="ri-idx">${i+1}</div><div class="lbav">${ini(p.name)}</div>
-      <div style="flex:1"><div style="font-size:12px;font-weight:600;margin-bottom:4px">${escHtml(p.name)}</div>
-      <div style="height:3px;background:var(--card3);border-radius:99px;overflow:hidden">
-      <div style="height:100%;width:${w}%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px"></div></div></div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+          <div style="font-size:12px;font-weight:600">${escHtml(p.name)}</div>
+          ${p.lastPlayed&&p.lastPlayed!=='—'?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm)">🗓 ${p.lastPlayed}</div>`:''}
+        </div>
+        <div style="height:3px;background:var(--card3);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${w}%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px"></div></div>
+      </div>
       <div style="font-family:var(--fm);font-size:12px;font-weight:500;color:var(--green)">${w}%</div></div>`;
   }).join('');
   const seen=new Set(),duos=[];
@@ -1188,13 +1258,25 @@ async function saveConfig(){
   showToast('Saving…');
   await saveCfg();
   // Bulletin post
-  const label=fv('bPostLabel').trim(),msg=fv('bPostMsg').trim();
+  const label=fv('bPostLabel').trim();
+  const headline=fv('bPostHeadline').trim();
+  const msg=fv('bPostMsg').trim();
   const urgentEl=document.getElementById('bPostUrgent');
   const urgent=urgentEl?urgentEl.checked:false;
+  const photoEl=document.getElementById('bPostPhoto');
+  const imageFile=photoEl&&photoEl.files[0]?photoEl.files[0]:null;
+  if(imageFile&&imageFile.size>1048576){
+    showToast('❌ Image over 1MB — please use a smaller file');
+    return;
+  }
   if(msg){
-    await savePost({label:label||'Notice',msg,urgent,date:''});
+    await savePost({label:label||'Notice',headline,msg,urgent,date:''},imageFile);
     const fv2=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
-    fv2('bPostLabel',''); fv2('bPostMsg','');
+    fv2('bPostLabel',''); fv2('bPostHeadline',''); fv2('bPostMsg','');
+    if(photoEl) photoEl.value='';
+    const pd=document.getElementById('photoPreview');if(pd)pd.style.display='none';
+    const hc=document.getElementById('headlineCount');if(hc)hc.textContent='0';
+    const wc=document.getElementById('msgWordCount');if(wc)wc.textContent='0';
     if(urgentEl) urgentEl.checked=false;
     const ub=document.getElementById('urgentBox');
     if(ub) ub.classList.remove('urgentbox-checked');
@@ -1208,6 +1290,40 @@ async function syncNow(){
   await loadSheetData();
   showToast('Synced ✓');
 }
+
+// ── Headline char counter ────────────────────────────────────────────────
+const headlineEl=document.getElementById('bPostHeadline');
+if(headlineEl) headlineEl.addEventListener('input',function(){
+  const hc=document.getElementById('headlineCount');
+  if(hc) hc.textContent=this.value.length;
+});
+
+// ── Message word counter ──────────────────────────────────────────────────
+const msgEl=document.getElementById('bPostMsg');
+if(msgEl) msgEl.addEventListener('input',function(){
+  const wc=document.getElementById('msgWordCount');
+  if(wc){
+    const words=this.value.trim().split(/\s+/).filter(w=>w.length>0);
+    const count=this.value.trim()===''?0:words.length;
+    if(count>1000){ this.value=words.slice(0,1000).join(' '); }
+    wc.textContent=Math.min(count,1000);
+    wc.style.color=count>900?'var(--accent)':'var(--muted)';
+  }
+});
+
+// ── Photo preview ─────────────────────────────────────────────────────────
+const photoEl2=document.getElementById('bPostPhoto');
+if(photoEl2) photoEl2.addEventListener('change',function(){
+  const file=this.files[0];
+  const pd=document.getElementById('photoPreview');
+  const pi=document.getElementById('photoPreviewImg');
+  const pw=document.getElementById('photoSizeWarn');
+  if(file&&pd&&pi){
+    const url=URL.createObjectURL(file);
+    pi.src=url; pd.style.display='block';
+    if(pw) pw.style.display=file.size>1048576?'block':'none';
+  } else if(pd){ pd.style.display='none'; }
+});
 
 // ── PIN auto-advance ─────────────────────────────────────────────────────
 document.querySelectorAll('.pin-i').forEach((el,i,all)=>{
