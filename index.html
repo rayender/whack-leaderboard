@@ -227,6 +227,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .bpost-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px}
 .bpost-date{font-size:10px;color:var(--muted);font-family:var(--fm)}
 .bpost-msg{font-size:15px;color:var(--text2);line-height:1.6}
+.bpost-accordion{border-top:1px solid var(--border)}
+.bpost-acc-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card2);border:none;color:var(--muted);font-size:12px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:background .15s}
+.bpost-acc-btn:hover{background:var(--card3);color:var(--text2)}
+.bpost-acc-arrow{font-size:10px;transition:transform .2s}
+.bpost-acc-body .bpost{border-top:1px solid var(--border);opacity:.85}
+.bpost-acc-body .bpost:first-child{border-top:none}
 .bpost-headline{font-family:var(--fh);font-size:1.4rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;line-height:1.2}
 .bpost-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;margin-top:10px;display:block}
 .bpost.urgent{background:rgba(224,53,53,.06);border-left:3px solid var(--accent);padding-left:11px}
@@ -398,8 +404,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <input type="number" id="cfgMax" value="32" min="4" max="64">
       </div>
       <div class="adm-field">
+        <label>Courts Available</label>
+        <input type="number" id="cfgCourts" value="2" min="1" max="20">
+      </div>
+      <div class="adm-field">
         <label>Season Label <span style="color:var(--muted2);font-size:9px">(optional)</span></label>
         <input type="text" id="cfgSeason" value="Season 1" placeholder="e.g. Season 2">
+      </div>
+      <div class="adm-field full">
+        <label>Session Location Name <span style="color:var(--muted2);font-size:9px">(e.g. "Al Nasr Leisureland Court 3")</span></label>
+        <input type="text" id="cfgLocationName" placeholder="Venue name…" maxlength="60">
+      </div>
+      <div class="adm-field full">
+        <label>Google Maps Link <span style="color:var(--muted2);font-size:9px">(paste maps.google.com or goo.gl/maps link)</span></label>
+        <input type="text" id="cfgLocationUrl" placeholder="https://maps.google.com/…">
       </div>
       <div class="adm-field full">
         <label>Google Sheets — Session CSV URL</label>
@@ -485,6 +503,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div class="hcd-unit"><span class="hcd-num" id="hcdM">00</span><span class="hcd-sub">Mins</span></div>
         <div class="hcd-unit"><span class="hcd-num" id="hcdS">00</span><span class="hcd-sub">Secs</span></div>
       </div>
+      <div id="locationBar" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <a id="locationLink" href="#" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text2);transition:color .15s"
+          onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--text2)'">
+          <span style="font-size:16px;flex-shrink:0">📍</span>
+          <div style="min-width:0">
+            <div id="locationName" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:1px">Tap to open in Maps</div>
+          </div>
+          <span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:var(--fm);flex-shrink:0">→</span>
+        </a>
+      </div>
     </div>
 
     <!-- Home slot summary -->
@@ -493,7 +523,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div class="hslot-title">This Week's Slots</div>
         <div class="hslot-frac"><span id="hSlotN">0</span> confirmed / <span id="hSlotMax">32</span> max</div>
       </div>
-      <div class="hslot-segs">
+      <div class="hslot-segs" style="grid-template-columns:1fr 1fr 1fr 1fr">
         <div class="hslot-seg" onclick="nav('session',document.querySelectorAll('.bni')[1])" style="cursor:pointer;transition:transform .15s;user-select:none" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform=''">
           <span class="hslot-seg-n" style="color:var(--green)" id="hCntConf">0</span>
           <span class="hslot-seg-l">Coming</span>
@@ -506,6 +536,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div class="hslot-seg">
           <span class="hslot-seg-n" style="color:var(--muted)" id="hCntLeft">0</span>
           <span class="hslot-seg-l">Slots Left</span>
+        </div>
+        <div class="hslot-seg">
+          <span class="hslot-seg-n" style="color:var(--blue)" id="hCntCourts">2</span>
+          <span class="hslot-seg-l">Courts</span>
         </div>
       </div>
       <div class="hslot-bar"><div class="hslot-fill" id="hSlotFill" style="width:0%"></div></div>
@@ -602,6 +636,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div class="cd-rlbl">Next session</div>
         <div class="cd-rval" id="cdDate">—</div>
         <div class="cd-rtime" id="cdTime">—</div>
+        <div id="cdLocation" style="display:none;margin-top:4px">
+          <a id="cdLocationLink" href="#" target="_blank" rel="noopener"
+            style="font-size:10px;color:var(--accent);font-family:var(--fm);text-decoration:none;display:flex;align-items:center;gap:3px;justify-content:flex-end">
+            📍 <span id="cdLocationName" style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block"></span>
+          </a>
+        </div>
       </div>
     </div>
     <div class="slot-wrap">
@@ -686,7 +726,10 @@ const CFG_DEFAULTS = {
   hourStart:19, minuteStart:0,
   hourEnd:22,   minuteEnd:0,
   maxSlots:32,
+  courts:2,
   season:'Season 1',
+  locationName:'',
+  locationUrl:'',
   sheetUrlSession:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=214704834&single=true&output=csv',
   sheetUrlLB:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=1526076979&single=true&output=csv'
 };
@@ -773,6 +816,7 @@ async function loadCfg(){
     saveCfgLocal();
     document.getElementById('seasonLbl').textContent=cfg.season||'Season 1';
     tick();
+    updateLocationDisplay();
   }
 }
 
@@ -785,7 +829,7 @@ async function loadPosts(){
   try{bulletinPosts=JSON.parse(localStorage.getItem('wg_posts')||'[]');}catch{bulletinPosts=[];}
   renderBulletin();
   // 2. Supabase override
-  const rows=await sbGet('posts','?select=id,label,msg,urgent,created_at&order=created_at.asc');
+  const rows=await sbGet('posts','?select=id,label,headline,msg,urgent,image_url,created_at&order=created_at.asc');
   if(rows!==null){
     bulletinPosts=rows.map(r=>({
       id:r.id,label:r.label,headline:r.headline||'',msg:r.msg,urgent:r.urgent,
@@ -834,9 +878,12 @@ async function savePost(post,imageFile){
     post.imageUrl=result[0].image_url||'';
     post.headline=result[0].headline||'';
     post.date=new Date(result[0].created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    console.log('[POST] Saved to Supabase OK, id:',post.id);
   } else {
+    console.error('[POST] Supabase insert failed — result:',result);
     post.imageUrl=imageUrl;
     post.date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    showToast('⚠️ Post saved locally only — check Supabase SQL (see instructions)');
   }
   bulletinPosts.push(post);
   savePostsLocal();
@@ -850,8 +897,14 @@ function renderBulletin(){
     el.innerHTML='<div class="bulletin-empty">No posts yet. Admin can post updates here.</div>';
     return;
   }
-  el.innerHTML=[...bulletinPosts].reverse().map(p=>`
-    <div class="bpost${p.urgent?' urgent':''}">
+
+  const sorted=[...bulletinPosts].reverse(); // newest first
+  const latest=sorted[0];
+  const older=sorted.slice(1,6); // up to 5 old posts
+
+  function postHTML(p,collapsed=false){
+    const id='bpost_'+p.id;
+    return `<div class="bpost${p.urgent?' urgent':''}" id="${id}">
       <div class="bpost-meta">
         <div class="bpost-label">
           ${p.urgent?'🚨':'📌'} ${escHtml(p.label||'Notice')}
@@ -862,7 +915,33 @@ function renderBulletin(){
       ${p.headline?`<div class="bpost-headline">${escHtml(p.headline)}</div>`:''}
       ${p.imageUrl?`<img class="bpost-img" src="${p.imageUrl}" alt="Post image" loading="lazy">`:''}
       <div class="bpost-msg">${escHtml(p.msg).replace(/\n/g,'<br>')}</div>
-    </div>`).join('');
+    </div>`;
+  }
+
+  let html=postHTML(latest);
+
+  if(older.length){
+    html+=`<div class="bpost-accordion">
+      <button class="bpost-acc-btn" onclick="toggleOldPosts(this)" aria-expanded="false">
+        <span>🗂 ${older.length} older post${older.length>1?'s':''}</span>
+        <span class="bpost-acc-arrow">▼</span>
+      </button>
+      <div class="bpost-acc-body" style="display:none">
+        ${older.map(p=>postHTML(p)).join('')}
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+function toggleOldPosts(btn){
+  const body=btn.nextElementSibling;
+  const arrow=btn.querySelector('.bpost-acc-arrow');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arrow.textContent=open?'▲':'▼';
+  btn.setAttribute('aria-expanded',open);
 }
 
 // ── CSV PARSER ───────────────────────────────────────────────────────────
@@ -1033,6 +1112,43 @@ async function loadSheetData(){
 
 function renderAll(){renderSession();renderLB();renderStats();}
 
+function updateLocationDisplay(){
+  const name=cfg.locationName||'';
+  const url=cfg.locationUrl||'';
+
+  // Home countdown location bar
+  const bar=document.getElementById('locationBar');
+  const link=document.getElementById('locationLink');
+  const nameEl=document.getElementById('locationName');
+  if(bar&&link&&nameEl){
+    if(name){
+      bar.style.display='block';
+      nameEl.textContent=name;
+      link.href=url||'#';
+      if(!url) link.style.pointerEvents='none';
+      else link.style.pointerEvents='';
+    } else {
+      bar.style.display='none';
+    }
+  }
+
+  // Session countdown location
+  const cdLoc=document.getElementById('cdLocation');
+  const cdLink=document.getElementById('cdLocationLink');
+  const cdName=document.getElementById('cdLocationName');
+  if(cdLoc&&cdLink&&cdName){
+    if(name){
+      cdLoc.style.display='block';
+      cdName.textContent=name;
+      cdLink.href=url||'#';
+      if(!url) cdLink.style.pointerEvents='none';
+      else cdLink.style.pointerEvents='';
+    } else {
+      cdLoc.style.display='none';
+    }
+  }
+}
+
 // ── SESSION ──────────────────────────────────────────────────────────────
 let activeFilter='coming';
 function setFilter(f,btn){
@@ -1058,6 +1174,8 @@ function renderSession(){
   document.getElementById('hSlotN').textContent=conf.length;
   document.getElementById('hSlotMax').textContent=cfg.maxSlots;
   document.getElementById('hSlotFill').style.width=`${Math.min(100,(conf.length/cfg.maxSlots)*100)}%`;
+  const courtsEl=document.getElementById('hCntCourts');
+  if(courtsEl) courtsEl.textContent=cfg.courts||2;
 
   const list=activeFilter==='coming'?[...conf,...tent]
     :activeFilter==='confirmed'?conf
@@ -1231,9 +1349,12 @@ function submitPin(){
     fv('cfgTimeStart',`${pad2(cfg.hourStart)}:${pad2(cfg.minuteStart)}`);
     fv('cfgTimeEnd',`${pad2(cfg.hourEnd)}:${pad2(cfg.minuteEnd)}`);
     fv('cfgMax',cfg.maxSlots);
+    fv('cfgCourts',cfg.courts||2);
     fv('cfgSeason',cfg.season);
     fv('cfgSheetSession',cfg.sheetUrlSession||'');
     fv('cfgSheetLB',cfg.sheetUrlLB||'');
+    fv('cfgLocationName',cfg.locationName||'');
+    fv('cfgLocationUrl',cfg.locationUrl||'');
     fv('bPostLabel',''); fv('bPostMsg','');
     setSheetStatus(cfg.sheetUrlSession||cfg.sheetUrlLB?'URLs loaded — click ↻ Sync Now to refresh data':'No sheet URLs saved yet','info');
   } else {
@@ -1251,10 +1372,14 @@ async function saveConfig(){
   cfg.hourStart=ts[0]||19; cfg.minuteStart=ts[1]||0;
   cfg.hourEnd=te[0]||22;   cfg.minuteEnd=te[1]||0;
   cfg.maxSlots=parseInt(fv('cfgMax'))||32;
+  cfg.courts=parseInt(fv('cfgCourts'))||2;
   cfg.season=fv('cfgSeason')||'Season 1';
   cfg.sheetUrlSession=fv('cfgSheetSession').trim();
   cfg.sheetUrlLB=fv('cfgSheetLB').trim();
+  cfg.locationName=fv('cfgLocationName').trim();
+  cfg.locationUrl=fv('cfgLocationUrl').trim();
   document.getElementById('seasonLbl').textContent=cfg.season;
+  updateLocationDisplay();
   showToast('Saving…');
   await saveCfg();
   // Bulletin post
@@ -1383,6 +1508,7 @@ function showToast(msg){
   await loadCfg();
   await loadPosts();
   tick();
+  updateLocationDisplay();
   setInterval(tick,1000);
   loadSheetData();
 })();
