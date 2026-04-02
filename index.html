@@ -400,8 +400,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <input type="text" id="cfgSeason" value="Season 1" placeholder="e.g. Season 2">
       </div>
       <div class="adm-field full">
-        <label>Google Sheets CSV URL</label>
-        <input type="text" id="cfgSheet" placeholder="Paste published CSV link here…">
+        <label>Google Sheets — Session CSV URL</label>
+        <input type="text" id="cfgSheetSession" placeholder="Paste 'session' tab published CSV link…">
+      </div>
+      <div class="adm-field full">
+        <label>Google Sheets — Leaderboard CSV URL</label>
+        <input type="text" id="cfgSheetLB" placeholder="Paste 'leaderboard' tab published CSV link…">
+      </div>
+      <div class="adm-field full" style="margin-top:-4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div id="sheetStatus" style="font-size:11px;color:var(--muted);font-family:var(--fm);flex:1">No sheet URLs saved yet</div>
+          <button onclick="syncNow()" style="background:var(--card2);border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">↻ Sync Now</button>
+        </div>
       </div>
 
       <div class="adm-divider"></div>
@@ -640,25 +650,160 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const ADMIN_PIN = '123456';
-// sessionDate: specific calendar date string 'YYYY-MM-DD', or '' to use next occurrence of sessionDay
-let cfg = {
-  sessionDate: '', // specific date from calendar
-  day: 5,          // fallback day of week (0=Sun…6=Sat)
+const CFG_KEY   = 'wg_cfg';
+
+const CFG_DEFAULTS = {
+  sessionDate: '', day: 5,
   hourStart: 19, minuteStart: 0,
   hourEnd: 22,   minuteEnd: 0,
   maxSlots: 32,
   season: 'Season 1',
-  sheetUrl: ''
+  sheetUrlSession: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=214704834&single=true&output=csv',
+  sheetUrlLB:      'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=1526076979&single=true&output=csv'
 };
 
-// ── BULLETIN POSTS ─────────────────────────────────────────────────────────────
-// Stored in localStorage key 'wg_posts' as JSON array [{label, msg, date}]
+let cfg = { ...CFG_DEFAULTS };
+
+function saveCfg() {
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+}
+function loadCfg() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+    cfg = { ...CFG_DEFAULTS, ...saved };
+  } catch(e) { cfg = { ...CFG_DEFAULTS }; }
+  // Apply season label
+  document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
+}
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const SB_URL = 'https://iweyxgakgqbunfzbrrgn.supabase.co';
+const SB_KEY = 'sb_publishable_6gjhBP8aIS1pu8GwJV2S5Q_4Loruowz';
+
+function sbHeaders() {
+  return {
+    'Content-Type':  'application/json',
+    'apikey':        SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Prefer':        'return=representation'
+  };
+}
+
+async function sbGet(table, query = '') {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
+      headers: { ...sbHeaders(), 'Prefer': '' }
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+async function sbPost(table, body) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+      method: 'POST', headers: sbHeaders(),
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+async function sbPatch(table, query, body) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
+      method: 'PATCH', headers: sbHeaders(),
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+async function sbDelete(table, query) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, {
+      method: 'DELETE', headers: { ...sbHeaders(), 'Prefer': '' }
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+
+// ── CONFIG — Supabase + localStorage fallback ──────────────────────────────────
+function saveCfgLocal() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+
+async function saveCfg() {
+  saveCfgLocal();
+  // Save to Supabase config table (row id=1 always)
+  const { sheetUrlSession, sheetUrlLB, ...rest } = cfg; // keep URLs local only
+  await sbPatch('config', '?id=eq.1', { data: rest, updated_at: new Date().toISOString() });
+}
+
+async function loadCfg() {
+  // 1. Load localStorage immediately (instant, no flicker)
+  try {
+    const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+    cfg = { ...CFG_DEFAULTS, ...saved };
+  } catch(e) { cfg = { ...CFG_DEFAULTS }; }
+  document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
+
+  // 2. Try Supabase (authoritative source)
+  const rows = await sbGet('config', '?id=eq.1&select=data');
+  if (rows && rows[0] && rows[0].data && Object.keys(rows[0].data).length) {
+    // Merge Supabase data but keep sheet URLs from localStorage (not stored in SB)
+    const remote = rows[0].data;
+    cfg = { ...CFG_DEFAULTS, ...remote,
+      sheetUrlSession: cfg.sheetUrlSession,
+      sheetUrlLB:      cfg.sheetUrlLB
+    };
+    saveCfgLocal();
+    document.getElementById('seasonLbl').textContent = cfg.season || 'Season 1';
+    tick();
+  }
+}
+
+// ── BULLETIN POSTS — Supabase + localStorage fallback ─────────────────────────
 let bulletinPosts = [];
 
-function loadPosts() {
-  try { bulletinPosts = JSON.parse(localStorage.getItem('wg_posts')||'[]'); } catch(e){ bulletinPosts=[]; }
+function savePostsLocal() { localStorage.setItem('wg_posts', JSON.stringify(bulletinPosts)); }
+
+async function loadPosts() {
+  // 1. Load localStorage immediately
+  try { bulletinPosts = JSON.parse(localStorage.getItem('wg_posts') || '[]'); } catch(e) { bulletinPosts = []; }
+  renderBulletin();
+
+  // 2. Load from Supabase (authoritative)
+  const rows = await sbGet('posts', '?select=id,label,msg,urgent,created_at&order=created_at.asc');
+  if (rows !== null) {
+    bulletinPosts = rows.map(r => ({
+      id:     r.id,
+      label:  r.label,
+      msg:    r.msg,
+      urgent: r.urgent,
+      date:   new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+    }));
+    savePostsLocal();
+    renderBulletin();
+  }
 }
-function savePosts() { localStorage.setItem('wg_posts', JSON.stringify(bulletinPosts)); }
+
+async function savePosts(post) {
+  // Insert single new post to Supabase
+  const result = await sbPost('posts', {
+    label:  post.label,
+    msg:    post.msg,
+    urgent: post.urgent
+  });
+  if (result && result[0]) {
+    // Add the Supabase-assigned id and formatted date
+    post.id   = result[0].id;
+    post.date = new Date(result[0].created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+  bulletinPosts.push(post);
+  savePostsLocal();
+  renderBulletin();
+}
 function renderBulletin() {
   const el = document.getElementById('bulletinPosts');
   if(!bulletinPosts.length){
@@ -679,8 +824,12 @@ function renderBulletin() {
 }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── MOCK DATA ──────────────────────────────────────────────────────────────────
-const LB = [
+// ── LIVE DATA (populated from Google Sheets or fallback to mock) ───────────────
+let LB = [];
+let SESSION = [];
+
+// ── MOCK FALLBACK (shown when no sheet URL configured) ────────────────────────
+const MOCK_LB = [
   { name:'Marcus T.', mmr:2180, prevRank:2, wins:48, losses:12, lastPlayed:'Jun 14', duo:'Ryan K.',   streak:5, tier:'diamond'  },
   { name:'Ryan K.',   mmr:2050, prevRank:1, wins:41, losses:14, lastPlayed:'Jun 14', duo:'Marcus T.', streak:2, tier:'diamond'  },
   { name:'Jess L.',   mmr:1890, prevRank:3, wins:37, losses:15, lastPlayed:'Jun 7',  duo:'Sam P.',    streak:0, tier:'platinum' },
@@ -694,7 +843,7 @@ const LB = [
   { name:'Tina F.',   mmr:950,  prevRank:12,wins:12, losses:30, lastPlayed:'Jun 7',  duo:'Josh A.',   streak:2, tier:'bronze'   },
   { name:'Josh A.',   mmr:880,  prevRank:11,wins:10, losses:28, lastPlayed:'Jun 14', duo:'Tina F.',   streak:0, tier:'bronze'   },
 ];
-const SESSION = [
+const MOCK_SESSION = [
   { name:'Marcus T.', status:'confirmed' },{ name:'Ryan K.',  status:'confirmed' },
   { name:'Jess L.',   status:'confirmed' },{ name:'Sam P.',   status:'confirmed' },
   { name:'Leo V.',    status:'confirmed' },{ name:'Nico R.',  status:'confirmed' },
@@ -704,6 +853,132 @@ const SESSION = [
   { name:'Zara Q.',   status:'tentative' },{ name:'Ben O.',   status:'tentative' },
   { name:'Lena K.',   status:'out'       },{ name:'Chris P.', status:'out'       },
 ];
+
+// ── CSV PARSER ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    // Handle quoted fields containing commas
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim(); });
+    return obj;
+  }).filter(r => r[headers[0]]); // skip empty rows
+}
+
+// ── GOOGLE SHEETS FETCH ───────────────────────────────────────────────────────
+// Uses a CORS proxy as fallback since Google Sheets blocks direct fetch from
+// file:// and some hosted origins
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://cors-anywhere.herokuapp.com/',
+];
+
+async function fetchCSV(url) {
+  if (!url || !url.includes('docs.google.com')) return null;
+  let u = url.includes('output=csv') ? url : url + (url.includes('?') ? '&' : '?') + 'output=csv';
+  // Try direct first
+  try {
+    const r = await fetch(u, { cache: 'no-store' });
+    if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
+  } catch(e) {}
+  // Try each CORS proxy
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const r = await fetch(proxy + encodeURIComponent(u), { cache: 'no-store' });
+      if (r.ok) { const t = await r.text(); if (t.includes(',')) return t; }
+    } catch(e) {}
+  }
+  return null;
+}
+
+function setSheetStatus(msg, type = 'info') {
+  const el = document.getElementById('sheetStatus');
+  if (!el) return;
+  const colors = { info: '#6e6e6e', ok: '#4ade80', err: '#e03535', loading: '#f59e0b' };
+  el.textContent = msg;
+  el.style.color = colors[type] || colors.info;
+}
+
+async function loadSheetData() {
+  const sessionUrl = cfg.sheetUrlSession;
+  const lbUrl      = cfg.sheetUrlLB;
+  const hasSession = sessionUrl && sessionUrl.includes('docs.google.com');
+  const hasLB      = lbUrl      && lbUrl.includes('docs.google.com');
+
+  if (!hasSession && !hasLB) {
+    LB      = MOCK_LB;
+    SESSION = MOCK_SESSION;
+    setSheetStatus('Using sample data — add Sheet URLs in Admin to load real data', 'info');
+    renderAll();
+    return;
+  }
+
+  setSheetStatus('⏳ Loading from Google Sheets…', 'loading');
+
+  let sessionOk = false, lbOk = false;
+
+  if (hasSession) {
+    const csv = await fetchCSV(sessionUrl);
+    if (csv) {
+      const rows = parseCSV(csv);
+      const valid = rows.filter(r => r.name && ['confirmed','tentative','out'].includes(r.status?.toLowerCase()));
+      if (valid.length) {
+        SESSION = valid.map(r => ({ name: r.name, status: r.status.toLowerCase() }));
+        sessionOk = true;
+      }
+    }
+  }
+  if (!sessionOk) SESSION = MOCK_SESSION;
+
+  if (hasLB) {
+    const csv = await fetchCSV(lbUrl);
+    if (csv) {
+      const rows = parseCSV(csv);
+      const valid = rows.filter(r => r.name && r.mmr);
+      if (valid.length) {
+        LB = valid.map(r => ({
+          name:       r.name,
+          mmr:        parseInt(r.mmr)       || 0,
+          prevRank:   parseInt(r.prevrank)  || parseInt(r.prevRank) || 0,
+          wins:       parseInt(r.wins)      || 0,
+          losses:     parseInt(r.losses)    || 0,
+          lastPlayed: r.lastplayed          || r.lastPlayed || '—',
+          duo:        r.duo                 || '—',
+          streak:     parseInt(r.streak)    || 0,
+          tier:       (r.tier              || 'bronze').toLowerCase(),
+        })).sort((a,b) => b.mmr - a.mmr);
+        lbOk = true;
+      }
+    }
+  }
+  if (!lbOk) LB = MOCK_LB;
+
+  if (sessionOk && lbOk)
+    setSheetStatus(`✅ Synced from Google Sheets — ${SESSION.length} players, ${LB.length} on leaderboard`, 'ok');
+  else if (sessionOk || lbOk)
+    setSheetStatus(`⚠️ Partial sync — ${sessionOk?'session ✅':'session ❌'} · ${lbOk?'leaderboard ✅':'leaderboard ❌'}`, 'err');
+  else
+    setSheetStatus('❌ Could not reach Google Sheets — check URLs in Admin. Showing sample data.', 'err');
+
+  renderAll();
+}
+
+function renderAll() {
+  renderSession();
+  renderLB();
+  renderStats();
+}
 const TIERS = [
   { name:'Diamond',  min:2000, cls:'t-diamond',  icon:'💎' },
   { name:'Platinum', min:1600, cls:'t-platinum',  icon:'🔷' },
@@ -908,22 +1183,26 @@ function submitPin(){
     closePin();adminOpen=true;
     document.getElementById('adminPanel').classList.add('open');
     document.getElementById('adminBtn').classList.add('on');
-    document.getElementById('cfgDate').value=cfg.sessionDate;
+    document.getElementById('cfgDate').value=cfg.sessionDate||'';
     document.getElementById('cfgTimeStart').value=`${pad2(cfg.hourStart)}:${pad2(cfg.minuteStart)}`;
     document.getElementById('cfgTimeEnd').value=`${pad2(cfg.hourEnd)}:${pad2(cfg.minuteEnd)}`;
     document.getElementById('cfgMax').value=cfg.maxSlots;
     document.getElementById('cfgSeason').value=cfg.season;
     document.getElementById('bPostLabel').value='';
     document.getElementById('bPostMsg').value='';
+    document.getElementById('cfgSheetSession').value=cfg.sheetUrlSession||'';
+    document.getElementById('cfgSheetLB').value=cfg.sheetUrlLB||'';
+    if(cfg.sheetUrlSession||cfg.sheetUrlLB){
+      setSheetStatus('URLs saved — click ↻ Sync Now to reload data','info');
+    }
   } else {
     document.getElementById('pinErr').textContent='Incorrect code. Try again.';
     document.querySelectorAll('.pin-i').forEach(i=>i.value='');
     document.querySelectorAll('.pin-i')[0].focus();
   }
 }
-function saveConfig(){
-  cfg.sessionDate = document.getElementById('cfgDate').value; // 'YYYY-MM-DD' or ''
-  // Derive day-of-week from chosen date as fallback
+async function saveConfig(){
+  cfg.sessionDate = document.getElementById('cfgDate').value;
   if(cfg.sessionDate){
     const [y,mo,dd]=cfg.sessionDate.split('-').map(Number);
     cfg.day=new Date(y,mo-1,dd).getDay();
@@ -934,28 +1213,35 @@ function saveConfig(){
   cfg.hourEnd=he;   cfg.minuteEnd=me;
   cfg.maxSlots=parseInt(document.getElementById('cfgMax').value)||32;
   cfg.season=document.getElementById('cfgSeason').value||'Season 1';
-  cfg.sheetUrl=document.getElementById('cfgSheet').value;
+  cfg.sheetUrlSession=document.getElementById('cfgSheetSession').value.trim();
+  cfg.sheetUrlLB=document.getElementById('cfgSheetLB').value.trim();
   document.getElementById('seasonLbl').textContent=cfg.season;
+
+  showToast('Saving…');
+  await saveCfg(); // Supabase + localStorage
 
   // Bulletin post
   const label=document.getElementById('bPostLabel').value.trim();
   const msg=document.getElementById('bPostMsg').value.trim();
   const urgent=document.getElementById('bPostUrgent').checked;
   if(msg){
-    bulletinPosts.push({
-      label:label||'Notice',
-      msg,
-      urgent,
-      date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-    });
-    savePosts();renderBulletin();
+    const post = { label:label||'Notice', msg, urgent, date:'' };
+    await savePosts(post); // saves to Supabase + rerenders
     document.getElementById('bPostLabel').value='';
     document.getElementById('bPostMsg').value='';
     document.getElementById('bPostUrgent').checked=false;
     document.getElementById('urgentBox').classList.remove('urgentbox-checked');
   }
-  tick();renderSession();
-  showToast(msg?'Settings saved & post published ✓':'Settings saved ✓');
+  tick(); renderSession();
+
+  if(cfg.sheetUrlSession||cfg.sheetUrlLB) loadSheetData();
+  else showToast(msg?'Saved & posted ✓':'Settings saved ✓');
+}
+
+async function syncNow(){
+  setSheetStatus('⏳ Syncing…','loading');
+  await loadSheetData();
+  showToast('Synced ✓');
 }
 
 // Urgent checkbox visual
@@ -998,14 +1284,14 @@ function showToast(msg){
   el.style.opacity='1';clearTimeout(_tt);_tt=setTimeout(()=>el.style.opacity='0',2600);
 }
 
-// ── INIT ────────────────────────────────────────────────────�
-loadPosts();
-renderBulletin();
-renderSession();
-renderLB();
-renderStats();
-tick();
-setInterval(tick,1000);
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadCfg();
+  await loadPosts();
+  tick();
+  setInterval(tick, 1000);
+  loadSheetData();
+})();
 </script>
 </body>
-</html>
+</html
