@@ -671,33 +671,9 @@ const CFG_DEFAULTS = {
 let cfg = {...CFG_DEFAULTS};
 
 // ── MOCK FALLBACK DATA ───────────────────────────────────────────────────
-const MOCK_LB = [
-  {name:'Marcus T.',mmr:2180,prevRank:2,wins:48,losses:12,lastPlayed:'Jun 14',duo:'Ryan K.',  streak:5,tier:'diamond'},
-  {name:'Ryan K.',  mmr:2050,prevRank:1,wins:41,losses:14,lastPlayed:'Jun 14',duo:'Marcus T.',streak:2,tier:'diamond'},
-  {name:'Jess L.',  mmr:1890,prevRank:3,wins:37,losses:15,lastPlayed:'Jun 7', duo:'Sam P.',   streak:0,tier:'platinum'},
-  {name:'Sam P.',   mmr:1740,prevRank:5,wins:33,losses:16,lastPlayed:'Jun 14',duo:'Jess L.',  streak:3,tier:'platinum'},
-  {name:'Leo V.',   mmr:1680,prevRank:4,wins:29,losses:18,lastPlayed:'Jun 7', duo:'Nico R.',  streak:0,tier:'gold'},
-  {name:'Nico R.',  mmr:1590,prevRank:6,wins:27,losses:20,lastPlayed:'Jun 14',duo:'Leo V.',   streak:1,tier:'gold'},
-  {name:'Priya M.', mmr:1420,prevRank:8,wins:24,losses:22,lastPlayed:'Jun 7', duo:'Dana W.',  streak:4,tier:'gold'},
-  {name:'Dana W.',  mmr:1310,prevRank:7,wins:20,losses:24,lastPlayed:'Jun 14',duo:'Priya M.', streak:0,tier:'silver'},
-  {name:'Kai T.',   mmr:1190,prevRank:9,wins:18,losses:25,lastPlayed:'Jun 7', duo:'Marc B.',  streak:0,tier:'silver'},
-  {name:'Marc B.',  mmr:1080,prevRank:10,wins:15,losses:27,lastPlayed:'Jun 1',duo:'Kai T.',   streak:0,tier:'silver'},
-  {name:'Tina F.',  mmr:950, prevRank:12,wins:12,losses:30,lastPlayed:'Jun 7',duo:'Josh A.',  streak:2,tier:'bronze'},
-  {name:'Josh A.',  mmr:880, prevRank:11,wins:10,losses:28,lastPlayed:'Jun 14',duo:'Tina F.', streak:0,tier:'bronze'},
-];
-const MOCK_SESSION = [
-  {name:'Marcus T.',status:'confirmed'},{name:'Ryan K.',  status:'confirmed'},
-  {name:'Jess L.',  status:'confirmed'},{name:'Sam P.',   status:'confirmed'},
-  {name:'Leo V.',   status:'confirmed'},{name:'Nico R.',  status:'confirmed'},
-  {name:'Priya M.', status:'confirmed'},{name:'Dana W.',  status:'confirmed'},
-  {name:'Kai T.',   status:'confirmed'},{name:'Marc B.',  status:'confirmed'},
-  {name:'Tina F.',  status:'tentative'},{name:'Josh A.',  status:'tentative'},
-  {name:'Zara Q.',  status:'tentative'},{name:'Ben O.',   status:'tentative'},
-  {name:'Lena K.',  status:'out'},      {name:'Chris P.', status:'out'},
-];
-
-let LB      = [...MOCK_LB];
-let SESSION = [...MOCK_SESSION];
+// No mock data — all data comes from Google Sheets
+let LB      = [];
+let SESSION = [];
 
 const TIERS = [
   {name:'Diamond', min:2000,cls:'t-diamond', icon:'💎'},
@@ -849,12 +825,12 @@ function parseCSV(text){
   }).filter(r=>r[headers[0]]);
 }
 
-// ── GOOGLE SHEETS FETCH via Supabase Edge Function ───────────────────────
+// ── GOOGLE SHEETS FETCH ──────────────────────────────────────────────────
 async function fetchCSV(url){
   if(!url||!url.includes('docs.google.com')) return null;
   const u=url.includes('output=csv')?url:url+(url.includes('?')?'&':'?')+'output=csv';
 
-  // Primary: Supabase Edge Function (server-side, no CORS issues)
+  // Method 1: Supabase Edge Function
   try{
     const r=await fetch(`${SB_URL}/functions/v1/fetch-csv`,{
       method:'POST',
@@ -863,22 +839,32 @@ async function fetchCSV(url){
     });
     if(r.ok){
       const text=await r.text();
-      if(text.length>10&&text.includes(',')) return text;
+      if(text.length>10&&text.includes(',')&&!text.includes('{')) return text;
+      console.warn('[CSV] Edge fn returned non-CSV:',text.slice(0,120));
+    } else {
+      console.warn('[CSV] Edge fn status:',r.status, await r.text().catch(()=>''));
     }
-  }catch(e){console.warn('[fetchCSV] Edge fn error:',e.message);}
+  }catch(e){console.warn('[CSV] Edge fn exception:',e.message);}
 
-  // Fallback 1: direct (works on localhost / some hosts)
+  // Method 2: allorigins (reliable public proxy)
   try{
-    const r=await fetch(u,{cache:'no-store'});
+    const r=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,{cache:'no-store'});
+    if(r.ok){const t=await r.text();if(t.length>10&&t.includes(',')&&!t.includes('{')) return t;}
+  }catch(e){console.warn('[CSV] allorigins fail:',e.message);}
+
+  // Method 3: corsproxy.io
+  try{
+    const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(u)}`,{cache:'no-store'});
+    if(r.ok){const t=await r.text();if(t.length>10&&t.includes(',')) return t;}
+  }catch(e){console.warn('[CSV] corsproxy fail:',e.message);}
+
+  // Method 4: direct (works on some hosts / localhost)
+  try{
+    const r=await fetch(u,{cache:'no-store',mode:'cors'});
     if(r.ok){const t=await r.text();if(t.includes(',')) return t;}
   }catch{}
 
-  // Fallback 2: corsproxy.io
-  try{
-    const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(u),{cache:'no-store'});
-    if(r.ok){const t=await r.text();if(t.includes(',')) return t;}
-  }catch{}
-
+  console.error('[CSV] All methods failed for:',u);
   return null;
 }
 
@@ -888,12 +874,13 @@ async function loadSheetData(){
   const hasL=lUrl&&lUrl.includes('docs.google.com');
 
   if(!hasS&&!hasL){
-    LB=[...MOCK_LB]; SESSION=[...MOCK_SESSION];
+    LB=[]; SESSION=[];
     setSheetStatus('Using sample data — add Sheet URLs in Admin to load real data','info');
     renderAll(); return;
   }
 
   setSheetStatus('⏳ Syncing with Google Sheets…','loading');
+  showToast('⏳ Fetching data…');
   let sOk=false, lOk=false;
 
   if(hasS){
@@ -907,7 +894,7 @@ async function loadSheetData(){
       }
     }
   }
-  if(!sOk) SESSION=[...MOCK_SESSION];
+  if(!sOk) SESSION=[];
 
   if(hasL){
     const csv=await fetchCSV(lUrl);
@@ -930,14 +917,18 @@ async function loadSheetData(){
       }
     }
   }
-  if(!lOk) LB=[...MOCK_LB];
+  if(!lOk) LB=[];
 
-  if(sOk&&lOk)
+  if(sOk&&lOk){
     setSheetStatus(`✅ Synced — ${SESSION.length} players · ${LB.length} on leaderboard`,'ok');
-  else if(sOk||lOk)
+    showToast(`✅ Synced — ${SESSION.length} players loaded`);
+  } else if(sOk||lOk){
     setSheetStatus(`⚠️ Partial — session:${sOk?'✅':'❌'} leaderboard:${lOk?'✅':'❌'}`,'err');
-  else
-    setSheetStatus('❌ Could not reach Google Sheets. Showing sample data.','err');
+    showToast('⚠️ Partial sync');
+  } else {
+    setSheetStatus('❌ Could not reach Google Sheets. Showing empty data.','err');
+    showToast('❌ Sheet sync failed');
+  }
 
   renderAll();
 }
