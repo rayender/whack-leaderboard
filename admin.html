@@ -3,16 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Whack Group</title>
+<title>Whack Group — Admin</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='29' height='27' viewBox='0 0 29 27' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z' fill='%23e03535'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#141414">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Whack Group">
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;
@@ -343,11 +338,84 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:99px}
+
+
+/* Admin page specific */
+.admin-page-wrap{max-width:580px;margin:0 auto;padding:14px 14px 40px}
+.admin-page-wrap .admin-panel{display:block!important;margin-bottom:0;border-radius:0;border-left:none;border-right:none;border-top:none;box-shadow:none;background:transparent}
+.admin-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+.admin-locked-icon{font-size:3rem;margin-bottom:16px}
+.admin-locked-title{font-family:var(--fh);font-size:1.6rem;letter-spacing:2px;margin-bottom:8px}
+.admin-locked-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
 </style>
 </head>
 <body>
 
-<!-- PIN MODAL -->
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <svg width="26" height="24" viewBox="0 0 29 27" fill="none">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z" fill="#e03535"/>
+    </svg>
+    <div>
+      <svg width="108" height="15" viewBox="0 0 108 15"><text x="0" y="13" font-family="'Bebas Neue', sans-serif" font-size="16" fill="var(--text)" letter-spacing="2" class="lgt-fill">ADMIN PANEL</text></svg>
+      <div class="brand-sub">Whack Group</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+    <a href="index.html" class="admin-btn" style="text-decoration:none">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back
+    </a>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- OLD POSTS MODAL -->
+<div class="overlay" id="oldPostsOverlay">
+  <div class="old-posts-modal">
+    <div class="old-posts-header">
+      <div class="old-posts-title">📋 Past Bulletins</div>
+      <button class="old-posts-close" onclick="document.getElementById('oldPostsOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="old-posts-body" id="oldPostsBody">
+      <div class="bulletin-empty">No older posts.</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div class="overlay" id="editPostOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" style="font-size:1.2rem;margin-bottom:12px">✏️ Edit Post</div>
+    <input type="hidden" id="editPostId">
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
+      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none">
+    </div>
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
+      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
+    </div>
+    <div class="adm-field full" style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
+      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
+    </div>
+    <div class="mactions">
+      <button class="mbtn sec" onclick="document.getElementById('editPostOverlay').classList.remove('open')">Cancel</button>
+      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- PIN overlay -->
 <div class="overlay" id="pinOverlay">
   <div class="modal">
     <div class="modal-title">Admin Access</div>
@@ -362,7 +430,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     </div>
     <div class="pin-err" id="pinErr"></div>
     <div class="mactions">
-      <button class="mbtn sec" onclick="closePin()">Cancel</button>
+      <button class="mbtn sec" onclick="window.location.href='index.html'">Cancel</button>
       <button class="mbtn pri" onclick="submitPin()">Enter</button>
     </div>
   </div>
@@ -372,36 +440,35 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 <div class="overlay" id="gcashOverlay">
   <div class="gcash-modal">
     <h2>💙 GCash Support</h2>
-    <p>Send your donation via GCash to support the Whack Group app development. Every peso helps! 🏸</p>
+    <p>Send your donation via GCash. Every peso helps! 🏸</p>
     <div class="gcash-num" id="gcashNum">+63 969 286 7882</div>
     <button class="gcash-copy" onclick="copyGcash()">Copy Number</button>
-    <button class="mbtn sec" style="width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--fb);background:var(--card2);color:var(--muted);border:1px solid var(--border2)" onclick="document.getElementById('gcashOverlay').classList.remove('open')">Close</button>
-  </div>
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="brand">
-    <svg width="26" height="24" viewBox="0 0 29 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z" fill="#e03535"/>
-    </svg>
-    <div>
-      <svg width="108" height="15" viewBox="0 0 108 15"><text x="0" y="13" font-family="'Bebas Neue', sans-serif" font-size="16" fill="var(--text)" letter-spacing="2" class="lgt-fill">WHACK GROUP</text></svg>
-      <div class="brand-sub">Badminton · <span id="seasonLbl">Season 1</span></div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
-    <a href="admin.html" class="admin-btn" id="adminBtn" style="text-decoration:none">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      Admin
-    </a>
+    <button class="mbtn sec" style="width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--fb);background:var(--card2);color:var(--muted);border:1px solid var(--border2);margin-top:8px" onclick="document.getElementById('gcashOverlay').classList.remove('open')">Close</button>
   </div>
 </div>
 
 <!-- CONTENT -->
-<div class="content">
+<div class="admin-page-wrap">
 
+  <!-- Locked state (before PIN) -->
+  <div id="adminLocked" class="admin-locked">
+    <div class="admin-locked-icon">🔐</div>
+    <div class="admin-locked-title">ADMIN AREA</div>
+    <div class="admin-locked-sub">This page is for admins only.<br>Enter your PIN to continue.</div>
+    <button class="adm-save" style="width:200px" onclick="openPin()">Enter PIN</button>
+  </div>
+
+  <!-- Admin content (shown after PIN) -->
+  <div id="adminContent" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border2)">
+      <div>
+        <div style="font-family:var(--fh);font-size:1.4rem;letter-spacing:2px;color:var(--accent)">SESSION CONTROL</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px">Whack Group Admin Panel</div>
+      </div>
+      <button onclick="lockAdmin()" style="background:var(--card2);border:1px solid var(--border2);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);text-transform:uppercase;letter-spacing:.5px">🔒 Lock</button>
+    </div>
+
+    <!-- Inline admin panel content (reused from index) -->
   <!-- ADMIN PANEL -->
   <div class="admin-panel" id="adminPanel">
     <div class="adm-head">
@@ -521,301 +588,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     </div>
   </div>
 
-  <!-- ═══ HOME PANEL ═══ -->
-  <div class="panel active" id="panel-home">
+    <button class="adm-save" onclick="saveConfig()" style="margin-top:16px">Save & Post</button>
 
-    <!-- Logo hero -->
-    <div style="text-align:center;padding:22px 16px 18px;background:var(--card);border:1px solid var(--border2);border-radius:14px;margin-bottom:12px;position:relative;overflow:hidden">
-      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(139,26,26,0.18),transparent 70%);pointer-events:none"></div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">
-        <svg width="38" height="36" viewBox="0 0 29 27" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z" fill="#e03535"/>
-        </svg>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:3px;color:var(--text);line-height:1" class="lgt-fill-text">WHACK GROUP</div>
-      </div>
-      <div style="font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Badminton Community · UAE</div>
-      <div style="width:40px;height:2px;background:var(--accent);border-radius:99px;margin:0 auto"></div>
-    </div>
-
-    <!-- No session banner (shown when admin sets noSession = true) -->
-    <div id="noSessionBanner" style="display:none;background:var(--card);border:1px solid var(--border2);border-left:3px solid var(--amber);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center">
-      <div style="font-size:1.6rem;margin-bottom:8px">🏸</div>
-      <div style="font-family:var(--fh);font-size:1.2rem;letter-spacing:1.5px;color:var(--text);margin-bottom:6px">NO SESSION THIS WEEK</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px">We're taking a short break — rest those arms! 💪<br>Stay tuned for the next schedule.</div>
-      <div style="font-size:11px;color:var(--muted);font-family:var(--fm)">📢 Check the bulletin board below for updates</div>
-    </div>
-
-    <!-- Countdown -->
-    <div class="hcd" id="homeCountdownWrap">
-      <div class="hcd-top">
-        <div class="hcd-label">Next Session</div>
-        <div class="hcd-date" id="hcdDate">—</div>
-      </div>
-      <div class="hcd-units">
-        <div class="hcd-unit"><span class="hcd-num" id="hcdD">0</span><span class="hcd-sub">Days</span></div>
-        <div class="hcd-unit"><span class="hcd-num" id="hcdH">00</span><span class="hcd-sub">Hours</span></div>
-        <div class="hcd-unit"><span class="hcd-num" id="hcdM">00</span><span class="hcd-sub">Mins</span></div>
-        <div class="hcd-unit"><span class="hcd-num" id="hcdS">00</span><span class="hcd-sub">Secs</span></div>
-      </div>
-      <div id="locationBar" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        <a id="locationLink" href="#" target="_blank" rel="noopener"
-          style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text2);transition:color .15s"
-          onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--text2)'">
-          <span style="font-size:16px;flex-shrink:0">📍</span>
-          <div style="min-width:0">
-            <div id="locationName" style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-            <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:1px">Tap to open in Maps</div>
-          </div>
-          <span style="margin-left:auto;font-size:10px;color:var(--accent);font-family:var(--fm);flex-shrink:0">→</span>
-        </a>
-      </div>
-    </div>
-
-    </div><!-- end homeCountdownWrap -->
-
-    <!-- Home slot summary -->
-    <div class="hslot" id="homeSlotWrap">
-      <div class="hslot-row">
-        <div class="hslot-title">This Week's Slots</div>
-        <div class="hslot-frac"><span id="hSlotN">0</span> confirmed / <span id="hSlotMax">32</span> max</div>
-      </div>
-      <div class="hslot-segs" style="grid-template-columns:1fr 1fr 1fr 1fr">
-        <div class="hslot-seg" onclick="nav('session',document.querySelectorAll('.bni')[1])" style="cursor:pointer;transition:transform .15s;user-select:none" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform=''">
-          <span class="hslot-seg-n" style="color:var(--green)" id="hCntConf">0</span>
-          <span class="hslot-seg-l">Coming</span>
-          <span style="font-size:8px;color:var(--accent);font-family:var(--fm);margin-top:2px;display:block;letter-spacing:.5px">TAP TO VIEW →</span>
-        </div>
-        <div class="hslot-seg">
-          <span class="hslot-seg-n" style="color:var(--amber)" id="hCntTent">0</span>
-          <span class="hslot-seg-l">Maybe</span>
-        </div>
-        <div class="hslot-seg">
-          <span class="hslot-seg-n" style="color:var(--muted)" id="hCntLeft">0</span>
-          <span class="hslot-seg-l">Slots Left</span>
-        </div>
-        <div class="hslot-seg">
-          <span class="hslot-seg-n" style="color:var(--blue)" id="hCntCourts">2</span>
-          <span class="hslot-seg-l">Courts</span>
-        </div>
-      </div>
-      <div class="hslot-bar"><div class="hslot-fill" id="hSlotFill" style="width:0%"></div></div>
-    </div>
-
-    </div><!-- end homeSlotWrap -->
-
-    <!-- Bulletin board -->
-    <div class="slbl">Admin Bulletin</div>
-    <div class="bulletin" id="bulletinBoard">
-      <div class="bulletin-head" style="text-align:center;padding:16px 14px">
-        <div class="bulletin-title" style="font-size:1.3rem;letter-spacing:2px;margin-bottom:4px">📌 NOTICE BOARD</div>
-        <div class="bulletin-tag" style="font-size:10px">From the admin</div>
-      </div>
-      <div id="bulletinPosts">
-        <div class="bulletin-empty">No posts yet. Admin can post updates here.</div>
-      </div>
-      <div id="oldPostsBtn" style="display:none;border-top:1px solid var(--border)">
-        <button onclick="openOldPosts()" style="width:100%;padding:11px 14px;background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:color .15s;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span>📋 View Past Bulletins</span>
-          <span style="font-size:9px">→</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Socials -->
-    <div class="slbl">Follow Us</div>
-    <div class="action-grid">
-      <a class="action-btn fb" href="https://www.facebook.com/whackapp" target="_blank" rel="noopener">
-        <div class="action-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073C24 5.404 18.627 0 12 0S0 5.404 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.269h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
-        </div>
-        <div>
-          <div class="action-label">Facebook</div>
-          <div class="action-sub">Follow app updates</div>
-        </div>
-      </a>
-      <a class="action-btn yt" href="https://www.youtube.com/@WhackUAE" target="_blank" rel="noopener">
-        <div class="action-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
-        </div>
-        <div>
-          <div class="action-label">YouTube</div>
-          <div class="action-sub">Watch past games</div>
-        </div>
-      </a>
-      <a class="action-btn wa" href="https://wa.me/971547113217" target="_blank" rel="noopener">
-        <div class="action-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-        </div>
-        <div>
-          <div class="action-label">WhatsApp</div>
-          <div class="action-sub">Inquire / Join us</div>
-        </div>
-      </a>
-      <a class="action-btn em" href="mailto:whackgamemaster@gmail.com?subject=Feedback%20-%20Whack%20Group" target="_blank" rel="noopener">
-        <div class="action-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <div>
-          <div class="action-label">Feedback</div>
-          <div class="action-sub">Send us your thoughts</div>
-        </div>
-      </a>
-    </div>
-
-    <!-- Support / Donate -->
-    <div class="slbl">Support the App</div>
-    <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:16px 14px;text-align:center;margin-bottom:12px">
-      <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px">❤️ <strong style="color:var(--text2)">Keep Whack Alive</strong> — your support helps us keep building for the community!</div>
-      <div style="display:flex;justify-content:center;gap:14px;margin-bottom:10px">
-        <a href="#" onclick="event.preventDefault();document.getElementById('gcashOverlay').classList.add('open')" title="GCash (Philippines)" style="width:52px;height:52px;border-radius:14px;background:rgba(0,122,255,.13);border:1px solid rgba(0,122,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;transition:transform .15s" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform=''">💙</a>
-        <a href="https://ko-fi.com/whackapp" target="_blank" rel="noopener" title="Ko-fi (International)" style="width:52px;height:52px;border-radius:14px;background:rgba(255,94,94,.12);border:1px solid rgba(255,94,94,.2);display:flex;align-items:center;justify-content:center;font-size:24px;text-decoration:none;transition:transform .15s" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform=''">☕</a>
-      </div>
-      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);letter-spacing:.5px">Thank you! 🙏</div>
-    </div>
-
-    <!-- Credits -->
-    <div class="credits">
-      Developed with ❤️ by <strong style="color:var(--muted)">JuRaCa</strong><br>
-      <span style="opacity:.5;font-size:9px">Whack Group · Badminton Community App</span>
+    <!-- Manage existing posts -->
+    <div id="managePostsSection2" style="margin-top:20px;display:none">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--fm);font-weight:600;margin-bottom:10px;padding-top:12px;border-top:1px solid var(--border2)">📋 Manage Existing Posts</div>
+      <div id="managePostsList"></div>
     </div>
 
   </div>
-
-  <!-- ═══ SESSION PANEL ═══ -->
-  <div class="panel" id="panel-session">
-    <div class="cd-card">
-      <div>
-        <div class="cd-lbl">Next session in</div>
-        <div class="cd-units">
-          <span class="cd-n" id="cdD">0</span><span class="cd-s">d</span>
-          <span class="cd-sep">:</span>
-          <span class="cd-n" id="cdH">00</span><span class="cd-s">h</span>
-          <span class="cd-sep">:</span>
-          <span class="cd-n" id="cdM">00</span><span class="cd-s">m</span>
-          <span class="cd-sep">:</span>
-          <span class="cd-n" id="cdS">00</span><span class="cd-s">s</span>
-        </div>
-      </div>
-      <div class="cd-right">
-        <div class="cd-rlbl">Next session</div>
-        <div class="cd-rval" id="cdDate">—</div>
-        <div class="cd-rtime" id="cdTime">—</div>
-        <div id="cdLocation" style="display:none;margin-top:4px">
-          <a id="cdLocationLink" href="#" target="_blank" rel="noopener"
-            style="font-size:10px;color:var(--accent);font-family:var(--fm);text-decoration:none;display:flex;align-items:center;gap:3px;justify-content:flex-end">
-            📍 <span id="cdLocationName" style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block"></span>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="slot-wrap">
-      <div class="slot-top">
-        <div class="slot-counts">
-          <div class="slot-stat"><div class="sdot" style="background:var(--green)"></div><span class="snum" id="cntConf">0</span><span class="s-lbl">in</span></div>
-          <div class="slot-stat"><div class="sdot" style="background:var(--amber)"></div><span class="snum" id="cntTent">0</span><span class="s-lbl">maybe</span></div>
-          <div class="slot-stat"><div class="sdot" style="background:var(--muted2)"></div><span class="snum" id="cntOut">0</span><span class="s-lbl">out</span></div>
-        </div>
-        <div class="slot-frac"><span id="slotN">0</span> / <span id="slotMax">32</span></div>
-      </div>
-      <div class="slot-track"><div class="slot-fill" id="slotFill" style="width:0%"></div></div>
-    </div>
-    <div class="chip-row">
-      <button class="chip on" onclick="setFilter('coming',this)"><span class="cdot" style="background:var(--green)"></span>Coming</button>
-      <button class="chip" onclick="setFilter('confirmed',this)">✅ Confirmed</button>
-      <button class="chip" onclick="setFilter('tentative',this)">⏳ Tentative</button>
-      <button class="chip" onclick="setFilter('out',this)">❌ Out</button>
-      <button class="chip" onclick="setFilter('all',this)">All</button>
-    </div>
-    <div class="pgrid" id="playerGrid"></div>
-  </div>
-
-  <!-- ═══ LEADERBOARD PANEL ═══ -->
-  <div class="panel" id="panel-lb">
-    <div class="slbl">Top 3</div>
-    <div class="podrow" id="podRow"></div>
-    <div class="slbl" style="margin-top:14px">Rankings</div>
-    <div class="lbt">
-      <div class="lbh"><div>#</div><div>Player</div><div>MMR</div><div>W/L</div><div>Best Duo</div></div>
-      <div id="lbBody"></div>
-    </div>
-  </div>
-
-  <!-- ═══ STATS PANEL ═══ -->
-  <div class="panel" id="panel-stats">
-    <div class="slbl">Overview</div>
-    <div class="sgrid" id="statCards"></div>
-    <div class="slbl">Win Rate Leaders</div>
-    <div id="wrList"></div>
-    <div class="slbl" style="margin-top:14px">Best Duos</div>
-    <div id="duoList"></div>
-  </div>
-
-</div>
-
-<!-- OLD POSTS MODAL -->
-<div class="overlay" id="oldPostsOverlay">
-  <div class="old-posts-modal">
-    <div class="old-posts-header">
-      <div class="old-posts-title">📋 Past Bulletins</div>
-      <button class="old-posts-close" onclick="document.getElementById('oldPostsOverlay').classList.remove('open')">✕</button>
-    </div>
-    <div class="old-posts-body" id="oldPostsBody">
-      <div class="bulletin-empty">No older posts.</div>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT POST MODAL -->
-<div class="overlay" id="editPostOverlay">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-title" style="font-size:1.2rem;margin-bottom:12px">✏️ Edit Post</div>
-    <input type="hidden" id="editPostId">
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
-      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none">
-    </div>
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
-      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
-    </div>
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
-      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
-      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
-    </div>
-    <div class="mactions">
-      <button class="mbtn sec" onclick="document.getElementById('editPostOverlay').classList.remove('open')">Cancel</button>
-      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <button class="bni active" onclick="nav('home',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Home
-  </button>
-  <button class="bni" onclick="nav('session',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Session
-  </button>
-  <button class="bni" onclick="nav('lb',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    Ranks
-  </button>
-  <button class="bni" onclick="nav('stats',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    Stats
-  </button>
 </div>
 
 <div id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+
 // ══════════════════════════════════════════════════════════════════════════
 // WHACK GROUP — Main Script
 // ══════════════════════════════════════════════════════════════════════════
@@ -1754,6 +1541,89 @@ function showToast(msg){
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+
+
+// ── ADMIN PAGE SPECIFIC ───────────────────────────────────────────────────
+let adminUnlocked = false;
+
+function openPin(){
+  document.getElementById('pinOverlay').classList.add('open');
+  document.querySelectorAll('.pin-i').forEach(i=>i.value='');
+  document.getElementById('pinErr').textContent='';
+  setTimeout(()=>document.querySelectorAll('.pin-i')[0].focus(),100);
+}
+
+function submitPin(){
+  const code=[...document.querySelectorAll('.pin-i')].map(i=>i.value).join('');
+  if(code===ADMIN_PIN){
+    document.getElementById('pinOverlay').classList.remove('open');
+    document.getElementById('adminLocked').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    adminUnlocked=true;
+    populateAdminFields();
+    renderManagePosts();
+    sessionStorage.setItem('wg_admin_unlocked','1');
+  } else {
+    document.getElementById('pinErr').textContent='Incorrect code. Try again.';
+    document.querySelectorAll('.pin-i').forEach(i=>i.value='');
+    document.querySelectorAll('.pin-i')[0].focus();
+  }
+}
+
+function lockAdmin(){
+  adminUnlocked=false;
+  sessionStorage.removeItem('wg_admin_unlocked');
+  document.getElementById('adminLocked').style.display='flex';
+  document.getElementById('adminContent').style.display='none';
+}
+
+function populateAdminFields(){
+  const fv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  fv('cfgDate',cfg.sessionDate||'');
+  fv('cfgTimeStart',`${pad2(cfg.hourStart)}:${pad2(cfg.minuteStart)}`);
+  fv('cfgTimeEnd',`${pad2(cfg.hourEnd)}:${pad2(cfg.minuteEnd)}`);
+  fv('cfgMax',cfg.maxSlots);
+  fv('cfgCourts',cfg.courts||2);
+  fv('cfgSeason',cfg.season);
+  fv('cfgSheetSession',cfg.sheetUrlSession||'');
+  fv('cfgSheetLB',cfg.sheetUrlLB||'');
+  fv('cfgLocationName',cfg.locationName||'');
+  fv('cfgLocationUrl',cfg.locationUrl||'');
+  fv('bPostLabel',''); fv('bPostHeadline',''); fv('bPostMsg','');
+  const nsEl=document.getElementById('cfgNoSession');
+  if(nsEl) nsEl.checked=!!cfg.noSession;
+  const nsBox=document.getElementById('noSessionBox');
+  if(nsBox) nsBox.style.background=cfg.noSession?'var(--accent)':'var(--card2)';
+  setSheetStatus(cfg.sheetUrlSession||cfg.sheetUrlLB?'URLs loaded — click ↻ Sync Now to refresh data':'No sheet URLs saved yet','info');
+}
+
+// Override handleAdmin (not used on this page)
+function handleAdmin(){}
+function closeAdmin(){}
+
+// Check if already unlocked this session
+(async()=>{
+  await loadCfg();
+  await loadPosts();
+  tick();
+  setInterval(tick,1000);
+  if(sessionStorage.getItem('wg_admin_unlocked')==='1'){
+    document.getElementById('adminLocked').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    adminUnlocked=true;
+    populateAdminFields();
+    renderManagePosts();
+  } else {
+    // Auto-open PIN on page load
+    setTimeout(openPin, 300);
+  }
+})();
+
+// Theme
+(()=>{
+  const t=localStorage.getItem('wg_theme');
+  if(t==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='🌙';}
+})();
 </script>
 </body>
 </html>
