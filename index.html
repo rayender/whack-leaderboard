@@ -347,26 +347,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 </head>
 <body>
 
-<!-- PIN MODAL -->
-<div class="overlay" id="pinOverlay">
-  <div class="modal">
-    <div class="modal-title">Admin Access</div>
-    <div class="modal-sub">Enter your 6-digit code to manage session settings and bulletin posts.</div>
-    <div class="pin-row">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-    </div>
-    <div class="pin-err" id="pinErr"></div>
-    <div class="mactions">
-      <button class="mbtn sec" onclick="closePin()">Cancel</button>
-      <button class="mbtn pri" onclick="submitPin()">Enter</button>
-    </div>
-  </div>
-</div>
 
 <!-- GCASH MODAL -->
 <div class="overlay" id="gcashOverlay">
@@ -401,125 +381,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 <!-- CONTENT -->
 <div class="content">
-
-  <!-- ADMIN PANEL -->
-  <div class="admin-panel" id="adminPanel">
-    <div class="adm-head">
-      <div class="adm-title">Session Control</div>
-      <div class="adm-tag">Admin</div>
-    </div>
-    <div class="adm-grid">
-      <div class="adm-section-lbl">📅 Session Settings</div>
-      <div class="adm-field full" style="margin-bottom:-2px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--text2)">
-          <span style="position:relative;width:22px;height:22px;flex-shrink:0">
-            <input type="checkbox" id="cfgNoSession" style="position:absolute;opacity:0;width:22px;height:22px;cursor:pointer;margin:0">
-            <span id="noSessionBox" style="display:block;width:22px;height:22px;background:var(--card2);border:2px solid var(--border2);border-radius:5px;transition:all .15s;pointer-events:none"></span>
-          </span>
-          <div>
-            <div style="font-weight:600">No session this week</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:1px">Hides countdown & slots — shows a friendly message on Home</div>
-          </div>
-        </label>
-      </div>
-
-      <!-- Calendar date picker (full width) -->
-      <div class="adm-field full">
-        <label>Session Date</label>
-        <input type="date" id="cfgDate" style="">
-        <style>body:not(.light) #cfgDate{color-scheme:dark}body.light #cfgDate{color-scheme:light}</style>
-      </div>
-
-      <!-- Start time / End time side by side -->
-      <div class="adm-field">
-        <label>Start Time</label>
-        <input type="time" id="cfgTimeStart" value="19:00">
-      </div>
-      <div class="adm-field">
-        <label>End Time</label>
-        <input type="time" id="cfgTimeEnd" value="22:00">
-      </div>
-
-      <div class="adm-field">
-        <label>Max Slots</label>
-        <input type="number" id="cfgMax" value="32" min="4" max="64">
-      </div>
-      <div class="adm-field">
-        <label>Courts Available</label>
-        <input type="number" id="cfgCourts" value="2" min="1" max="20">
-      </div>
-      <div class="adm-field">
-        <label>Season Label <span style="color:var(--muted2);font-size:9px">(optional)</span></label>
-        <input type="text" id="cfgSeason" value="Season 1" placeholder="e.g. Season 2">
-      </div>
-      <div class="adm-field full">
-        <label>Session Location Name <span style="color:var(--muted2);font-size:9px">(e.g. "Al Nasr Leisureland Court 3")</span></label>
-        <input type="text" id="cfgLocationName" placeholder="Venue name…" maxlength="60">
-      </div>
-      <div class="adm-field full">
-        <label>Google Maps Link <span style="color:var(--muted2);font-size:9px">(paste maps.google.com or goo.gl/maps link)</span></label>
-        <input type="text" id="cfgLocationUrl" placeholder="https://maps.google.com/…">
-      </div>
-      <div class="adm-field full">
-        <label>Google Sheets — Session CSV URL</label>
-        <input type="text" id="cfgSheetSession" placeholder="Paste 'session' tab published CSV link…">
-      </div>
-      <div class="adm-field full">
-        <label>Google Sheets — Leaderboard CSV URL</label>
-        <input type="text" id="cfgSheetLB" placeholder="Paste 'leaderboard' tab published CSV link…">
-      </div>
-      <div class="adm-field full" style="margin-top:-4px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <div id="sheetStatus" style="font-size:11px;color:var(--muted);font-family:var(--fm);flex:1">No sheet URLs saved yet</div>
-          <button onclick="syncNow()" style="background:var(--card2);border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">↻ Sync Now</button>
-        </div>
-      </div>
-
-      <div class="adm-divider"></div>
-      <div class="adm-section-lbl">📌 Bulletin Board Post</div>
-
-      <div class="adm-field full">
-        <label>Post Label <span style="color:var(--muted2);font-size:9px">(optional — e.g. "Reminder", "Update")</span></label>
-        <input type="text" id="bPostLabel" placeholder="Notice" maxlength="40">
-      </div>
-      <div class="adm-field full">
-        <label>Headline <span style="color:var(--muted2);font-size:9px">(optional — max 25 characters)</span></label>
-        <input type="text" id="bPostHeadline" placeholder="Big bold headline…" maxlength="25" style="font-weight:600;font-size:14px">
-        <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:4px;text-align:right"><span id="headlineCount">0</span>/25</div>
-      </div>
-      <div class="adm-field full">
-        <label>Message <span style="color:var(--muted2);font-size:9px">(up to 1,000 words)</span></label>
-        <textarea id="bPostMsg" rows="5" placeholder="Type your message to the group here…" style="min-height:100px"></textarea>
-        <div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:4px;text-align:right"><span id="msgWordCount">0</span> words</div>
-      </div>
-      <div class="adm-field full">
-        <label>Photo <span style="color:var(--muted2);font-size:9px">(optional · JPG or PNG · square · 800×800px ideal · max 1MB)</span></label>
-        <input type="file" id="bPostPhoto" accept="image/jpeg,image/png" style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:12px;cursor:pointer;width:100%">
-        <div id="photoPreview" style="margin-top:8px;display:none">
-          <img id="photoPreviewImg" style="width:100%;max-width:200px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2)">
-          <div id="photoSizeWarn" style="font-size:10px;color:var(--accent);margin-top:4px;display:none">⚠️ Image is over 1MB — please use a smaller file</div>
-        </div>
-      </div>
-
-      <!-- Urgent checkbox -->
-      <div class="adm-field full" style="margin-top:-2px">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--text2)">
-          <span style="position:relative;width:18px;height:18px;flex-shrink:0">
-            <input type="checkbox" id="bPostUrgent" style="position:absolute;opacity:0;width:18px;height:18px;cursor:pointer;margin:0">
-            <span id="urgentBox" style="display:block;width:18px;height:18px;background:var(--card2);border:2px solid var(--border2);border-radius:4px;transition:all .15s;pointer-events:none"></span>
-          </span>
-          <span>Mark as <strong style="color:var(--accent)">🚨 Urgent</strong> announcement</span>
-        </label>
-      </div>
-    </div>
-    <div class="adm-note">💡 Posts appear on the Home board instantly. Urgent posts are highlighted in red. Only 1 latest + 5 old posts are kept — oldest auto-deleted when limit is reached.</div>
-    <button class="adm-save" onclick="saveConfig()">Save & Post</button>
-    <!-- Manage existing posts -->
-    <div id="managePostsSection" style="margin-top:14px;display:none">
-      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--fm);font-weight:600;margin-bottom:10px;padding-top:4px;border-top:1px solid var(--border2);padding-top:12px">📋 Manage Existing Posts</div>
-      <div id="managePostsList"></div>
-    </div>
-  </div>
 
   <!-- ═══ HOME PANEL ═══ -->
   <div class="panel active" id="panel-home">
@@ -651,7 +512,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
           <div class="action-sub">Inquire / Join us</div>
         </div>
       </a>
-      <a class="action-btn em" href="mailto:whackgamemaster@gmail.com?subject=Feedback%20-%20Whack%20Group" target="_blank" rel="noopener">
+      <a class="action-btn em" href="/cdn-cgi/l/email-protection#26514e47454d41474b434b475552435466414b474f4a0845494b195553444c4345521b604343424447454d0314160b031416714e47454d0314166154495356" target="_blank" rel="noopener">
         <div class="action-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
@@ -765,33 +626,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
   </div>
 </div>
 
-<!-- EDIT POST MODAL -->
-<div class="overlay" id="editPostOverlay">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-title" style="font-size:1.2rem;margin-bottom:12px">✏️ Edit Post</div>
-    <input type="hidden" id="editPostId">
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
-      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none">
-    </div>
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
-      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
-    </div>
-    <div class="adm-field full" style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
-      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
-      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
-    </div>
-    <div class="mactions">
-      <button class="mbtn sec" onclick="document.getElementById('editPostOverlay').classList.remove('open')">Cancel</button>
-      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
-    </div>
-  </div>
-</div>
 
 <!-- BOTTOM NAV -->
 <div class="bnav">
@@ -815,7 +649,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 <div id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+<script>
+
 // ══════════════════════════════════════════════════════════════════════════
 // WHACK GROUP — Main Script
 // ══════════════════════════════════════════════════════════════════════════
@@ -1750,9 +1586,29 @@ function showToast(msg){
   loadSheetData();
 })();
 
+// ── Re-sync when returning from admin page ────────────────────────────────
+document.addEventListener('visibilitychange', async()=>{
+  if(document.visibilityState==='visible'){
+    await loadCfg();
+    await loadPosts();
+    tick();
+    updateLocationDisplay();
+    updateNoSessionDisplay();
+    renderSession();
+  }
+});
+
 // ── PWA Service Worker ────────────────────────────────────────────────────
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+function toggleOldPosts(btn){
+  const body=btn.nextElementSibling;
+  const arrow=btn.querySelector('.bpost-acc-arrow');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(arrow) arrow.textContent=open?'▲':'▼';
+  btn.setAttribute('aria-expanded',String(open));
 }
 </script>
 </body>
