@@ -570,7 +570,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
           <div class="action-sub">Inquire / Join us</div>
         </div>
       </a>
-      <a class="action-btn em" href="/cdn-cgi/l/email-protection#26514e47454d41474b434b475552435466414b474f4a0845494b195553444c4345521b604343424447454d0314160b031416714e47454d0314166154495356" target="_blank" rel="noopener">
+      <a class="action-btn em" href="mailto:whackgamemaster@gmail.com?subject=Feedback - Whack Group App" target="_blank" rel="noopener">
         <div class="action-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
@@ -579,6 +579,40 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
           <div class="action-sub">Send us your thoughts</div>
         </div>
       </a>
+    </div>
+
+    <!-- Install PWA accordion -->
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:14px;margin-bottom:12px;overflow:hidden">
+      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.pwa-arr').textContent=this.nextElementSibling.style.display==='block'?'▲':'▼'" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:transparent;border:none;cursor:pointer;text-align:left">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">📲</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--fb)">Install the App</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--fb)">Add to your home screen</div>
+          </div>
+        </div>
+        <span class="pwa-arr" style="font-size:10px;color:var(--muted);flex-shrink:0">▼</span>
+      </button>
+      <div style="display:none;padding:0 16px 16px;border-top:1px solid var(--border)">
+        <!-- iPhone / Safari -->
+        <div style="margin-top:12px;margin-bottom:12px">
+          <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📱 iPhone / iPad (Safari)</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.8">
+            1. Tap the <strong style="color:var(--text2)">Share</strong> button ⎋ at the bottom<br>
+            2. Scroll and tap <strong style="color:var(--text2)">"Add to Home Screen"</strong><br>
+            3. Tap <strong style="color:var(--text2)">Add</strong> — done!
+          </div>
+        </div>
+        <!-- Android / Chrome -->
+        <div style="padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">🤖 Android (Chrome)</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.8">
+            1. Tap the <strong style="color:var(--text2)">⋮ menu</strong> (top right)<br>
+            2. Tap <strong style="color:var(--text2)">"Add to Home screen"</strong> or <strong style="color:var(--text2)">"Install app"</strong><br>
+            3. Tap <strong style="color:var(--text2)">Install</strong> — done!
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Support / Donate -->
@@ -732,6 +766,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     <div style="margin-bottom:10px">
       <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
       <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
+    </div>
+    <!-- Current photo preview -->
+    <div id="editCurrentPhotoWrap" style="display:none;margin-bottom:10px">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Current Photo</div>
+      <img id="editCurrentPhoto" style="width:100%;max-width:160px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2);display:block;margin-bottom:6px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--accent)">
+        <input type="checkbox" id="editRemovePhoto" style="width:14px;height:14px;accent-color:var(--accent)">
+        Remove current photo
+      </label>
+    </div>
+    <!-- Replace photo -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Replace Photo <span style="color:var(--muted2);font-size:9px;text-transform:none;letter-spacing:0">(optional · JPG/PNG · max 1MB)</span></div>
+      <input type="file" id="editPostPhoto" accept="image/jpeg,image/png" onchange="editPhotoPreview(this)" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:7px 10px;font-family:var(--fb);font-size:12px">
+      <img id="editNewPhotoPreview" style="display:none;width:100%;max-width:160px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2);margin-top:6px">
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
       <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
@@ -1137,6 +1186,27 @@ function openOldPosts(){
 
 
 // Auto-trim: keep max 6 posts total (1 latest + 5 old), delete oldest beyond that
+async function confirmDeletePost(id){
+  const p=bulletinPosts.find(x=>x.id===id);
+  if(!p) return;
+  const preview=(p.headline||p.msg||'').slice(0,50);
+  if(!confirm('Delete this post?\n\n"'+preview+'"\n\nThis cannot be undone.')) return;
+  await deletePost(id);
+}
+
+async function deletePost(id){
+  const ok=await sbDelete('posts','?id=eq.'+id);
+  if(ok||ok===null){
+    bulletinPosts=bulletinPosts.filter(p=>p.id!==id);
+    savePostsLocal();
+    renderBulletin();
+    renderManagePosts();
+    showToast('Post deleted');
+  } else {
+    showToast('❌ Delete failed — check Supabase policies');
+  }
+}
+
 async function trimOldPosts(){
   if(bulletinPosts.length<=6) return;
   const sorted=[...bulletinPosts].sort((a,b)=>a.id-b.id); // oldest first
@@ -2036,10 +2106,34 @@ function openEditPost(id){
   sv('editPostId',id); sv('editPostLabel',p.label||'');
   sv('editPostHeadline',p.headline||''); sv('editPostMsg',p.msg||'');
   const eu=document.getElementById('editPostUrgent');if(eu)eu.checked=!!p.urgent;
+  // Photo: show current if exists
+  const cpWrap=document.getElementById('editCurrentPhotoWrap');
+  const cpImg=document.getElementById('editCurrentPhoto');
+  const rpCb=document.getElementById('editRemovePhoto');
+  const newPh=document.getElementById('editPostPhoto');
+  const newPrev=document.getElementById('editNewPhotoPreview');
+  if(cpWrap&&cpImg){
+    if(p.imageUrl){cpImg.src=p.imageUrl;cpWrap.style.display='block';}
+    else cpWrap.style.display='none';
+  }
+  if(rpCb) rpCb.checked=false;
+  if(newPh) newPh.value='';
+  if(newPrev){newPrev.style.display='none';newPrev.src='';}
   const ep=document.getElementById('editPostOverlay');if(ep)ep.classList.add('open');
+}
+function editPhotoPreview(input){
+  const prev=document.getElementById('editNewPhotoPreview');
+  if(!prev) return;
+  const file=input.files[0];
+  if(file){prev.src=URL.createObjectURL(file);prev.style.display='block';}
+  else{prev.style.display='none';prev.src='';}
 }
 function closeEditPost(){
   const ep=document.getElementById('editPostOverlay');if(ep)ep.classList.remove('open');
+  const newPh=document.getElementById('editPostPhoto');if(newPh)newPh.value='';
+  const newPrev=document.getElementById('editNewPhotoPreview');
+  if(newPrev){newPrev.style.display='none';newPrev.src='';}
+  const rpCb=document.getElementById('editRemovePhoto');if(rpCb)rpCb.checked=false;
 }
 async function submitEditPost(){
   const gv=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
@@ -2047,10 +2141,22 @@ async function submitEditPost(){
   const label=gv('editPostLabel'), headline=gv('editPostHeadline'), msg=gv('editPostMsg');
   const eu=document.getElementById('editPostUrgent'), urgent=eu?eu.checked:false;
   if(!msg){showToast('Message required');return;}
-  const result=await sbPatch('posts','?id=eq.'+id,{label:label||'Notice',headline,msg,urgent});
+  const p=bulletinPosts.find(x=>x.id===id);
+  let imageUrl=p?p.imageUrl||'':'';
+  const photoEl=document.getElementById('editPostPhoto');
+  const removeEl=document.getElementById('editRemovePhoto');
+  const imageFile=photoEl&&photoEl.files[0]?photoEl.files[0]:null;
+  if(removeEl&&removeEl.checked){
+    imageUrl='';
+  } else if(imageFile){
+    if(imageFile.size>1048576){showToast('❌ Image over 1MB');return;}
+    showToast('⏳ Uploading…');
+    imageUrl=await uploadBulletinImage(imageFile)||imageUrl;
+  }
+  const result=await sbPatch('posts','?id=eq.'+id,{label:label||'Notice',headline,msg,urgent,image_url:imageUrl});
   if(result!==null){
-    const idx=bulletinPosts.findIndex(p=>p.id===id);
-    if(idx>=0) bulletinPosts[idx]={...bulletinPosts[idx],label:label||'Notice',headline,msg,urgent};
+    const idx2=bulletinPosts.findIndex(p=>p.id===id);
+    if(idx2>=0) bulletinPosts[idx2]={...bulletinPosts[idx2],label:label||'Notice',headline,msg,urgent,imageUrl};
     renderBulletin(); renderManagePosts(); closeEditPost(); showToast('Updated ✓');
   } else showToast('❌ Update failed');
 }
