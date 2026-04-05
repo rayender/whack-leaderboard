@@ -1,15 +1,10 @@
-// Whack Group Service Worker
-// Strategy: Network first, cache fallback — always serves fresh content
+const CACHE = 'whack-v2';
+const CORE = ['/', '/index.html', '/manifest.json'];
 
-const CACHE = 'whack-v1';
-const OFFLINE_URLS = ['/', '/index.html', '/admin.html', '/manifest.json'];
-
-// Install — pre-cache shell
+// Install — cache core files
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache =>
-      cache.addAll(OFFLINE_URLS).catch(() => {})
-    )
+    caches.open(CACHE).then(c => c.addAll(CORE)).catch(() => {})
   );
   self.skipWaiting();
 });
@@ -26,56 +21,51 @@ self.addEventListener('activate', e => {
 
 // Fetch — network first, cache fallback
 self.addEventListener('fetch', e => {
-  // Skip non-GET and cross-origin requests (Supabase, Google Sheets)
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
-
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Cache successful responses
         if (res && res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
         }
         return res;
       })
-      .catch(() =>
-        // Network failed — serve from cache
-        caches.match(e.request).then(cached =>
-          cached || caches.match('/index.html')
-        )
-      )
+      .catch(() => caches.match(e.request))
   );
 });
 
-// Push notifications (future)
+// Push notification received
 self.addEventListener('push', e => {
-  if (!e.data) return;
-  const data = e.data.json();
-  e.waitUntil(
-    self.registration.showNotification(data.title || 'Whack Group 🏸', {
-      body:  data.body  || 'New update from Whack Group',
-      icon:  data.icon  || '/icon-192.png',
-      badge: data.badge || '/icon-192.png',
-      tag:   data.tag   || 'whack-notification',
-      data:  data.url   || '/',
-      vibrate: [200, 100, 200],
-      actions: data.actions || []
-    })
-  );
+  let data = {};
+  try { data = e.data ? e.data.json() : {}; } catch {}
+  const title = data.title || 'Whack Group 🏸';
+  const options = {
+    body:    data.body  || 'New update from Whack Group',
+    icon:    '/manifest.json',
+    badge:   '/manifest.json',
+    tag:     data.tag   || 'whack-notification',
+    renotify: true,
+    data:    { url: data.url || '/' },
+    vibrate: [200, 100, 200],
+    actions: data.actions || [],
+  };
+  e.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Notification click — open app
+// Notification click — open/focus the app
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url === '/' && 'focus' in client) return client.focus();
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.navigate(url).then(c => c.focus());
+        }
       }
-      if (clients.openWindow) return clients.openWindow(e.notification.data || '/');
+      return clients.openWindow(url);
     })
   );
 });
