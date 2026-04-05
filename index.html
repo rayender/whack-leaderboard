@@ -2031,7 +2031,28 @@ function renderManagePosts(){
     </div>`).join('');
 }
 
+async function deletePost(id){
+  const ok=await sbDelete('posts','?id=eq.'+id);
+  if(ok||ok===null){
+    bulletinPosts=bulletinPosts.filter(p=>p.id!==id);
+    savePostsLocal();
+    renderBulletin();
+    renderManagePosts();
+    showToast('Post deleted');
+  } else {
+    showToast('❌ Delete failed — check Supabase policies');
+  }
+}
+
 // ── Edit post ─────────────────────────────────────────────────────────────
+function editPhotoPreview(input){
+  const prev=document.getElementById('editNewPhotoPreview');
+  if(!prev) return;
+  const file=input.files[0];
+  if(file){prev.src=URL.createObjectURL(file);prev.style.display='block';}
+  else{prev.style.display='none';prev.src='';}
+}
+
 function openEditPost(id){
   const p=bulletinPosts.find(x=>x.id===id);if(!p) return;
   const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
@@ -2067,7 +2088,13 @@ document.querySelectorAll('.pin-i').forEach((el,i,all)=>{
   el.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!el.value&&i>0)all[i-1].focus();if(e.key==='Enter')submitPin();});
 });
 
-
+async function confirmDeletePost(id){
+  const p=bulletinPosts.find(x=>x.id===id);
+  if(!p) return;
+  const preview=(p.headline||p.msg||'').slice(0,50);
+  if(!confirm('Delete this post?\n\n"'+preview+'"\n\nThis cannot be undone.')) return;
+  await deletePost(id);
+}
 </script>
 </body>
 </html>
