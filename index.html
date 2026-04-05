@@ -50,7 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .topbar-right{display:flex;align-items:center;gap:8px}
 .icon-btn{background:var(--card);border:1px solid var(--border2);color:var(--muted);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:14px;flex-shrink:0}
 .icon-btn:hover{border-color:var(--border3);color:var(--text)}
-.admin-btn{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border2);color:var(--muted);padding:0 12px;height:34px;border-radius:8px;font-size:11px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;white-space:nowrap}
+.admin-btn{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border2);color:var(--muted);padding:0 9px;height:28px;border-radius:7px;font-size:10px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:all .2s;white-space:nowrap}
 .admin-btn:hover,.admin-btn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 
 /* ── BOTTOM NAV ── */
@@ -420,7 +420,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="brand">
+  <button class="brand" onclick="nav('home',document.querySelector('.bni'))" style="background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent">
     <svg width="26" height="24" viewBox="0 0 29 27" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M26.9369 22.9552L23.2448 21.6733L24.2182 23.4588L23.097 23.803L18.8726 16.6308L17.9668 16.7468L21.7138 24.7987L20.203 24.3676L17.5307 16.916L16.9521 16.8763L18.6055 23.9857L17.5793 24.6363C17.5678 24.57 16.3255 17.4213 16.2384 16.7246L14.9894 17.1267C15.1173 17.8187 16.0145 24.7182 16.0241 24.792L14.7845 24.6537L14.433 17.1586L13.9156 16.8986C13.9262 17.4928 13.6242 25.2851 13.621 25.3662L11.9117 27L13.2462 17.35L12.1872 17.4844L11.2602 21.9652L10.7661 24.6537L7.47621 27L0 4.42282L8.25434 2.13166L10.2583 15.4378L11.3352 11.6482L12.1186 7.63626L17.4167 6.09044L20.4986 16.0952L20.1428 0.671882L29 0L26.9369 22.9552ZM17.8179 13.7518C17.8179 13.7518 17.0965 10.9789 14.3422 11.7062C12.1158 12.2942 12.4171 14.2039 12.4206 14.2255L12.6201 15.8149L14.8584 14.9168L18.0438 14.9864L17.8179 13.7518Z" fill="#e03535"/>
     </svg>
@@ -428,7 +428,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
       <svg width="108" height="15" viewBox="0 0 108 15"><text x="0" y="13" font-family="'Bebas Neue', sans-serif" font-size="16" fill="var(--text)" letter-spacing="2" class="lgt-fill">WHACK GROUP</text></svg>
       <div class="brand-sub">Badminton · <span id="seasonLbl">Season 1</span></div>
     </div>
-  </div>
+  </button>
   <div class="topbar-right">
     <button class="icon-btn" id="pushBtn" onclick="togglePush()" title="Enable notifications" style="font-size:16px;display:none">🔕</button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
