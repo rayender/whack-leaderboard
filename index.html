@@ -878,10 +878,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Ranks
   </button>
-  <button class="bni" onclick="nav('stats',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" 
+    <button class="bni" onclick="nav('stats',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Stats
+  </button>
+</div>
 
+<div id="toast"></div>
 
+<script>
 // ══════════════════════════════════════════════════════════════════════════
 // WHACK GROUP — Main Script
 // ══════════════════════════════════════════════════════════════════════════
@@ -2059,6 +2064,7 @@ document.querySelectorAll('.pin-i').forEach((el,i,all)=>{
 
   el.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!el.value&&i>0)all[i-1].focus();if(e.key==='Enter')submitPin();});
 });
+
 
 </script>
 </body>
