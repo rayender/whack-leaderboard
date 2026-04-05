@@ -70,7 +70,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .adm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .adm-title{font-family:var(--fh);font-size:1.1rem;letter-spacing:1.5px;color:var(--accent)}
 .adm-tag{font-size:9px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(224,53,53,.25);padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:1px}
-.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:480px){.adm-grid{grid-template-columns:1fr!important}.adm-field input[type="date"],.adm-field input[type="time"]{font-size:16px}}
 .adm-field label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px}
 .adm-field input,.adm-field select,.adm-field textarea{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 11px;font-family:var(--fb);font-size:13px;outline:none;transition:border-color .2s;resize:vertical}
 .adm-field input:focus,.adm-field select:focus,.adm-field textarea:focus{border-color:var(--accent)}
@@ -197,17 +197,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 /* ── LB TABLE ── */
 .lbt{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}
 .lbh{display:grid;grid-template-columns:34px 1fr 68px 56px 1fr;padding:9px 13px;border-bottom:1px solid var(--border2);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;font-family:var(--fm)}
-.lbr{display:grid;grid-template-columns:34px 1fr 68px 56px 1fr;align-items:center;padding:10px 13px;border-bottom:1px solid var(--border);transition:background .15s;cursor:default}
+.lbr{display:grid;grid-template-columns:38px 1fr 60px 50px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);transition:background .15s;cursor:default}
 .lbr:last-child{border-bottom:none}
 .lbr:hover{background:var(--card2)}
 .lb-rank{font-family:var(--fm);font-size:11px;color:var(--muted);font-weight:500;display:flex;flex-direction:column;gap:1px}
 .rc{font-size:8px}.rc.up{color:var(--green)}.rc.dn{color:var(--accent)}.rc.eq{color:var(--muted2)}
 .lb-pl{display:flex;align-items:center;gap:8px;min-width:0}
 .lbav{width:29px;height:29px;border-radius:50%;flex-shrink:0;background:var(--card2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.75rem;color:var(--muted)}
-.lb-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lb-mmr{font-family:var(--fm);font-size:12px;font-weight:500}
-.lb-wl{font-size:11px;color:var(--muted)}.lb-wl .g{color:var(--green);font-weight:600}
-.lb-duo{font-size:11px;color:var(--purple);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-mmr{font-family:var(--fm);font-size:11px;font-weight:500;text-align:right}
+.lb-wl{font-size:10px;color:var(--muted);text-align:right}.lb-wl .g{color:var(--green);font-weight:600}
+.lb-duo{font-size:10px;color:var(--purple);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── SEC LABEL ── */
 .slbl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--fm);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -232,10 +232,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .bulletin-empty{padding:20px 14px;text-align:center;color:var(--muted);font-size:12px}
 .bpost{padding:12px 14px;border-bottom:1px solid var(--border)}
 .bpost:last-child{border-bottom:none}
-.bpost-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.bpost-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .bpost-label{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px}
 .bpost-date{font-size:10px;color:var(--muted);font-family:var(--fm)}
-.bpost-msg{font-size:15px;color:var(--text2);line-height:1.6}
+.bpost-msg{font-size:14px;color:var(--text2);line-height:1.65;margin-top:8px}
 .bpost-accordion{border-top:1px solid var(--border)}
 .bpost-acc-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card2);border:none;color:var(--muted);font-size:12px;font-weight:600;font-family:var(--fb);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;transition:background .15s}
 .bpost-acc-btn:hover{background:var(--card3);color:var(--text2)}
@@ -263,10 +263,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .old-posts-close{background:var(--card2);border:1px solid var(--border2);color:var(--muted);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s}
 .old-posts-close:hover{color:var(--text);border-color:var(--border3)}
 .old-posts-body{overflow-y:auto;padding:0;flex:1}
-.old-posts-body .bpost{border-bottom:1px solid var(--border)}
+.old-posts-body .bpost{border-bottom:1px solid var(--border);padding:14px}
 .old-posts-body .bpost:last-child{border-bottom:none}
 .bpost-headline{font-family:var(--fh);font-size:1.4rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;line-height:1.2}
-.bpost-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;margin-top:10px;display:block}
+.bpost-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;margin-top:12px;margin-bottom:4px;display:block}
 .bpost.urgent{background:rgba(224,53,53,.06);border-left:3px solid var(--accent);padding-left:11px}
 .bpost.urgent .bpost-label{color:var(--accent)}
 .bpost-urgent-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(224,53,53,.25);padding:1px 6px;border-radius:99px;margin-left:6px;font-weight:700;letter-spacing:.5px}
@@ -362,7 +362,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .acard-body{padding:16px}
 .adm-field{display:flex;flex-direction:column;gap:4px}
 .adm-field.full{grid-column:1/-1}
-.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:480px){.adm-grid{grid-template-columns:1fr!important}.adm-field input[type="date"],.adm-field input[type="time"]{font-size:16px}}
 .adm-field label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm)}
 .adm-field input,.adm-field select,.adm-field textarea{background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;transition:border-color .2s;resize:vertical;width:100%}
 .adm-field input:focus,.adm-field select:focus,.adm-field textarea:focus{border-color:var(--accent)}
@@ -570,7 +570,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
           <div class="action-sub">Inquire / Join us</div>
         </div>
       </a>
-      <a class="action-btn em" href="mailto:whackgamemaster@gmail.com?subject=Feedback - Whack Group App" target="_blank" rel="noopener">
+      <a class="action-btn em" href="/cdn-cgi/l/email-protection#26514e47454d41474b434b475552435466414b474f4a0845494b195553444c4345521b604343424447454d0314160b031416714e47454d0314166154495356" target="_blank" rel="noopener">
         <div class="action-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
@@ -579,40 +579,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
           <div class="action-sub">Send us your thoughts</div>
         </div>
       </a>
-    </div>
-
-    <!-- Install PWA accordion -->
-    <div style="background:var(--card);border:1px solid var(--border2);border-radius:14px;margin-bottom:12px;overflow:hidden">
-      <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.pwa-arr').textContent=this.nextElementSibling.style.display==='block'?'▲':'▼'" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:transparent;border:none;cursor:pointer;text-align:left">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:18px">📲</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--fb)">Install the App</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:1px;font-family:var(--fb)">Add to your home screen</div>
-          </div>
-        </div>
-        <span class="pwa-arr" style="font-size:10px;color:var(--muted);flex-shrink:0">▼</span>
-      </button>
-      <div style="display:none;padding:0 16px 16px;border-top:1px solid var(--border)">
-        <!-- iPhone / Safari -->
-        <div style="margin-top:12px;margin-bottom:12px">
-          <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📱 iPhone / iPad (Safari)</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            1. Tap the <strong style="color:var(--text2)">Share</strong> button ⎋ at the bottom<br>
-            2. Scroll and tap <strong style="color:var(--text2)">"Add to Home Screen"</strong><br>
-            3. Tap <strong style="color:var(--text2)">Add</strong> — done!
-          </div>
-        </div>
-        <!-- Android / Chrome -->
-        <div style="padding-top:12px;border-top:1px solid var(--border)">
-          <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">🤖 Android (Chrome)</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            1. Tap the <strong style="color:var(--text2)">⋮ menu</strong> (top right)<br>
-            2. Tap <strong style="color:var(--text2)">"Add to Home screen"</strong> or <strong style="color:var(--text2)">"Install app"</strong><br>
-            3. Tap <strong style="color:var(--text2)">Install</strong> — done!
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Support / Donate -->
@@ -766,21 +732,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     <div style="margin-bottom:10px">
       <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
       <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
-    </div>
-    <!-- Current photo preview -->
-    <div id="editCurrentPhotoWrap" style="display:none;margin-bottom:10px">
-      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Current Photo</div>
-      <img id="editCurrentPhoto" style="width:100%;max-width:160px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2);display:block;margin-bottom:6px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--accent)">
-        <input type="checkbox" id="editRemovePhoto" style="width:14px;height:14px;accent-color:var(--accent)">
-        Remove current photo
-      </label>
-    </div>
-    <!-- Replace photo -->
-    <div style="margin-bottom:10px">
-      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Replace Photo <span style="color:var(--muted2);font-size:9px;text-transform:none;letter-spacing:0">(optional · JPG/PNG · max 1MB)</span></div>
-      <input type="file" id="editPostPhoto" accept="image/jpeg,image/png" onchange="editPhotoPreview(this)" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:7px 10px;font-family:var(--fb);font-size:12px">
-      <img id="editNewPhotoPreview" style="display:none;width:100%;max-width:160px;aspect-ratio:1/1;object-fit:cover;border-radius:8px;border:1px solid var(--border2);margin-top:6px">
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
       <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
@@ -1186,27 +1137,6 @@ function openOldPosts(){
 
 
 // Auto-trim: keep max 6 posts total (1 latest + 5 old), delete oldest beyond that
-async function confirmDeletePost(id){
-  const p=bulletinPosts.find(x=>x.id===id);
-  if(!p) return;
-  const preview=(p.headline||p.msg||'').slice(0,50);
-  if(!confirm('Delete this post?\n\n"'+preview+'"\n\nThis cannot be undone.')) return;
-  await deletePost(id);
-}
-
-async function deletePost(id){
-  const ok=await sbDelete('posts','?id=eq.'+id);
-  if(ok||ok===null){
-    bulletinPosts=bulletinPosts.filter(p=>p.id!==id);
-    savePostsLocal();
-    renderBulletin();
-    renderManagePosts();
-    showToast('Post deleted');
-  } else {
-    showToast('❌ Delete failed — check Supabase policies');
-  }
-}
-
 async function trimOldPosts(){
   if(bulletinPosts.length<=6) return;
   const sorted=[...bulletinPosts].sort((a,b)=>a.id-b.id); // oldest first
@@ -1550,12 +1480,8 @@ function renderLB(){
         <div><div class="lb-name">${escHtml(p.name)}${s}</div>
         <div class="ptier ${t.cls}" style="font-size:8px;padding:1px 6px;margin-top:3px">${t.icon} ${t.name}</div></div>
       </div>
-      <div class="lb-mmr">${p.mmr}</div>
-      <div class="lb-wl"><span class="g">${p.wins}</span>/${p.losses}</div>
-      <div class="lb-duo">
-        <div>${escHtml(p.duo)}</div>
-        ${p.lastPlayed&&p.lastPlayed!=='—'?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:2px">🗓 ${p.lastPlayed}</div>`:''}
-      </div>
+      <div class="lb-mmr">${p.mmr}<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:1px">${p.wins}W ${p.losses}L</div></div>
+      <div style="text-align:right">${p.lastPlayed&&p.lastPlayed!=='—'?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm)">${p.lastPlayed}</div>`:''}</div>
     </div>`;
   }).join('');
 }
@@ -1590,13 +1516,19 @@ function renderStats(){
   }).join('');
   const seen=new Set(),duos=[];
   LB.forEach(p=>{const k=[p.name,p.duo].sort().join('|');if(!seen.has(k)&&p.duo&&p.duo!=='—'){seen.add(k);duos.push([p.name,p.duo]);}});
-  document.getElementById('duoList').innerHTML=duos.slice(0,6).map(([a,b])=>{
+  document.getElementById('duoList').innerHTML=duos.slice(0,10).map(([a,b],di)=>{
     const pa=LB.find(p=>p.name===a),pb=LB.find(p=>p.name===b);
     const avg=pa&&pb?Math.round((safeWr(pa)+safeWr(pb))/2):null;
-    return `<div class="ritem">
-      <div style="display:flex"><div class="lbav" style="z-index:1">${ini(a)}</div><div class="lbav" style="margin-left:-10px">${ini(b)}</div></div>
-      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">${escHtml(a)}</div><div style="font-size:11px;color:var(--purple)">${escHtml(b)}</div></div>
-      ${avg!==null?`<div style="font-size:10px;color:var(--muted);font-family:var(--fm)">${avg}% avg WR</div>`:''}
+    const ra=pa?LB.indexOf(pa)+1:null, rb=pb?LB.indexOf(pb)+1:null;
+    return `<div class="ritem" style="gap:10px">
+      <div style="font-family:var(--fm);font-size:10px;color:var(--muted);width:18px;flex-shrink:0;text-align:center">${di+1}</div>
+      <div style="display:flex;flex-shrink:0"><div class="lbav" style="z-index:1">${ini(a)}</div><div class="lbav" style="margin-left:-8px">${ini(b)}</div></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4">
+          ${escHtml(a)}${ra?`<span style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-left:3px">#${ra}</span>`:''} <span style="color:var(--muted2)">&amp;</span> ${escHtml(b)}${rb?`<span style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-left:3px">#${rb}</span>`:''}
+        </div>
+        ${avg!==null?`<div style="font-size:10px;color:var(--muted);font-family:var(--fm)">${avg}% avg win rate</div>`:''}
+      </div>
     </div>`;
   }).join('')||'<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">No duo data yet</div>';
 }
@@ -2106,34 +2038,10 @@ function openEditPost(id){
   sv('editPostId',id); sv('editPostLabel',p.label||'');
   sv('editPostHeadline',p.headline||''); sv('editPostMsg',p.msg||'');
   const eu=document.getElementById('editPostUrgent');if(eu)eu.checked=!!p.urgent;
-  // Photo: show current if exists
-  const cpWrap=document.getElementById('editCurrentPhotoWrap');
-  const cpImg=document.getElementById('editCurrentPhoto');
-  const rpCb=document.getElementById('editRemovePhoto');
-  const newPh=document.getElementById('editPostPhoto');
-  const newPrev=document.getElementById('editNewPhotoPreview');
-  if(cpWrap&&cpImg){
-    if(p.imageUrl){cpImg.src=p.imageUrl;cpWrap.style.display='block';}
-    else cpWrap.style.display='none';
-  }
-  if(rpCb) rpCb.checked=false;
-  if(newPh) newPh.value='';
-  if(newPrev){newPrev.style.display='none';newPrev.src='';}
   const ep=document.getElementById('editPostOverlay');if(ep)ep.classList.add('open');
-}
-function editPhotoPreview(input){
-  const prev=document.getElementById('editNewPhotoPreview');
-  if(!prev) return;
-  const file=input.files[0];
-  if(file){prev.src=URL.createObjectURL(file);prev.style.display='block';}
-  else{prev.style.display='none';prev.src='';}
 }
 function closeEditPost(){
   const ep=document.getElementById('editPostOverlay');if(ep)ep.classList.remove('open');
-  const newPh=document.getElementById('editPostPhoto');if(newPh)newPh.value='';
-  const newPrev=document.getElementById('editNewPhotoPreview');
-  if(newPrev){newPrev.style.display='none';newPrev.src='';}
-  const rpCb=document.getElementById('editRemovePhoto');if(rpCb)rpCb.checked=false;
 }
 async function submitEditPost(){
   const gv=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
@@ -2141,22 +2049,10 @@ async function submitEditPost(){
   const label=gv('editPostLabel'), headline=gv('editPostHeadline'), msg=gv('editPostMsg');
   const eu=document.getElementById('editPostUrgent'), urgent=eu?eu.checked:false;
   if(!msg){showToast('Message required');return;}
-  const p=bulletinPosts.find(x=>x.id===id);
-  let imageUrl=p?p.imageUrl||'':'';
-  const photoEl=document.getElementById('editPostPhoto');
-  const removeEl=document.getElementById('editRemovePhoto');
-  const imageFile=photoEl&&photoEl.files[0]?photoEl.files[0]:null;
-  if(removeEl&&removeEl.checked){
-    imageUrl='';
-  } else if(imageFile){
-    if(imageFile.size>1048576){showToast('❌ Image over 1MB');return;}
-    showToast('⏳ Uploading…');
-    imageUrl=await uploadBulletinImage(imageFile)||imageUrl;
-  }
-  const result=await sbPatch('posts','?id=eq.'+id,{label:label||'Notice',headline,msg,urgent,image_url:imageUrl});
+  const result=await sbPatch('posts','?id=eq.'+id,{label:label||'Notice',headline,msg,urgent});
   if(result!==null){
-    const idx2=bulletinPosts.findIndex(p=>p.id===id);
-    if(idx2>=0) bulletinPosts[idx2]={...bulletinPosts[idx2],label:label||'Notice',headline,msg,urgent,imageUrl};
+    const idx=bulletinPosts.findIndex(p=>p.id===id);
+    if(idx>=0) bulletinPosts[idx]={...bulletinPosts[idx],label:label||'Notice',headline,msg,urgent};
     renderBulletin(); renderManagePosts(); closeEditPost(); showToast('Updated ✓');
   } else showToast('❌ Update failed');
 }
