@@ -830,9 +830,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div id="attendanceList">
           <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Loading…</div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="adm-save" onclick="saveAttendance()" style="flex:1">💾 Save Attendance</button>
-          <button onclick="clearAttendance()" style="padding:11px 14px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">✕ Clear</button>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+          <button class="adm-save" onclick="saveAttendance()">💾 Save Attendance for This Session</button>
+          <div style="display:flex;gap:8px">
+            <button onclick="updateAttendance()" style="flex:1;padding:10px;background:var(--card2);border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .2s">↻ Update Status</button>
+            <button onclick="clearAttendance()" style="padding:10px 14px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">✕ Clear</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2433,12 +2436,19 @@ function setAttendance(playerId, status){
   rebuildSession();
 }
 
-// Bulk save all attendance to Supabase
+// Bulk save all attendance to Supabase (with confirm prompt)
 async function saveAttendance(){
   if(!hasActiveSession()){ showToast('No session scheduled'); return; }
   if(!PLAYERS.length){ showToast('No players registered'); return; }
-  showToast('⏳ Saving attendance…');
   const date = cfg.sessionDate;
+  const d = new Date(date+'T00:00:00').toLocaleDateString('en-US',
+    {weekday:'long', month:'long', day:'numeric'});
+  const coming   = PLAYERS.filter(p=>ATTENDANCE[p.id]==='coming').length;
+  const tentative= PLAYERS.filter(p=>ATTENDANCE[p.id]==='tentative').length;
+  const out      = PLAYERS.filter(p=>ATTENDANCE[p.id]==='out').length;
+  const summary  = `${coming} coming · ${tentative} maybe · ${out} out`;
+  if(!confirm(`Save attendance for ${d}?\n\n${summary}\n\nThis will overwrite any existing attendance for this session.`)) return;
+  showToast('⏳ Saving attendance…');
 
   // Step 1: Delete all existing attendance for this session date
   await sbDelete('session_attendance', `?session_date=eq.${date}`);
@@ -2797,6 +2807,38 @@ async function saveTotals(){
   } else {
     showToast('No changes to save');
   }
+}
+
+// Update status only — silent save without confirm prompt
+async function updateAttendance(){
+  if(!hasActiveSession()){ showToast('No session scheduled'); return; }
+  if(!PLAYERS.length){ return; }
+  showToast('⏳ Updating…');
+  const date = cfg.sessionDate;
+
+  await sbDelete('session_attendance', `?session_date=eq.${date}`);
+
+  const rows = PLAYERS
+    .filter(p => ATTENDANCE[p.id])
+    .map(p => ({ player_id: p.id, session_date: date, status: ATTENDANCE[p.id] }));
+
+  if(rows.length > 0){
+    const r = await fetch(`${SB_URL}/rest/v1/session_attendance`, {
+      method: 'POST',
+      headers: sbH(),
+      body: JSON.stringify(rows)
+    });
+    if(!r.ok){
+      const err = await r.json().catch(()=>({}));
+      showToast('❌ ' + (err.message||err.hint||'Update failed').slice(0,60));
+      return;
+    }
+  }
+
+  await loadAttendance();
+  renderAttendanceList();
+  rebuildSession();
+  showToast('✅ Status updated');
 }
 
 // ── Clear all attendance locally ──────────────────────────────────────────
