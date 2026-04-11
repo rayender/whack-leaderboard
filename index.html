@@ -2409,15 +2409,15 @@ async function loadAttendance(){
 }
 
 function rebuildSession(){
-  // Build SESSION from PLAYERS + ATTENDANCE so renderSession works unchanged
+  // Map attendance statuses to session statuses:
+  // 'coming' → 'confirmed', 'tentative' → 'tentative', 'out' → 'out'
+  const statusMap = { coming:'confirmed', tentative:'tentative', out:'out' };
   SESSION = PLAYERS
-    .filter(p => ATTENDANCE[p.id] && ATTENDANCE[p.id] !== 'out'
-              ? true : ATTENDANCE[p.id] === 'out' ? true : false)
+    .filter(p => ATTENDANCE[p.id])
     .map(p => ({
       name:   p.name,
-      status: ATTENDANCE[p.id] || null,
-    }))
-    .filter(p => p.status); // only players with a status set
+      status: statusMap[ATTENDANCE[p.id]] || ATTENDANCE[p.id],
+    }));
   renderSession();
 }
 
@@ -2439,33 +2439,37 @@ async function saveAttendance(){
   if(!PLAYERS.length){ showToast('No players registered'); return; }
   showToast('⏳ Saving attendance…');
   const date = cfg.sessionDate;
-  let ok = 0, fail = 0;
 
-  for(const p of PLAYERS){
-    const status = ATTENDANCE[p.id] || null;
-    if(status){
-      // Upsert via POST with on_conflict resolution
-      const r = await fetch(`${SB_URL}/rest/v1/session_attendance`, {
-        method: 'POST',
-        headers: {...sbH(), 'Prefer': 'resolution=merge-duplicates,return=representation'},
-        body: JSON.stringify({ player_id: p.id, session_date: date, status })
-      });
-      r.ok ? ok++ : fail++;
+  // Step 1: Delete all existing attendance for this session date
+  await sbDelete('session_attendance', `?session_date=eq.${date}`);
+
+  // Step 2: Insert all players that have a status
+  const rows = PLAYERS
+    .filter(p => ATTENDANCE[p.id])
+    .map(p => ({ player_id: p.id, session_date: date, status: ATTENDANCE[p.id] }));
+
+  let saved = 0;
+  if(rows.length > 0){
+    // Insert all rows at once
+    const r = await fetch(`${SB_URL}/rest/v1/session_attendance`, {
+      method: 'POST',
+      headers: sbH(),
+      body: JSON.stringify(rows)
+    });
+    if(r.ok){
+      saved = rows.length;
     } else {
-      // Delete if no status
-      await sbDelete('session_attendance',
-        `?player_id=eq.${p.id}&session_date=eq.${date}`);
+      const err = await r.json().catch(()=>({}));
+      console.error('[ATTENDANCE] save failed:', r.status, err.message||err.hint||JSON.stringify(err));
+      showToast('❌ ' + (err.message||err.hint||'Save failed — check console').slice(0,60));
+      return;
     }
   }
 
   await loadAttendance();
   renderAttendanceList();
   rebuildSession();
-  if(fail > 0){
-    showToast(`⚠️ ${ok} saved, ${fail} failed`);
-  } else {
-    showToast(`✅ Attendance saved — ${ok} player${ok!==1?'s':''} set`);
-  }
+  showToast(`✅ Attendance saved — ${saved} player${saved!==1?'s':''} set`);
 }
 
 // ── Render attendance list in admin ──────────────────────────────────────
