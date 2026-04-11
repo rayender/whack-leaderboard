@@ -55,7 +55,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 /* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--bg2);border-top:1px solid var(--border2);display:flex;padding-bottom:var(--safe-bottom)}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px;cursor:pointer;font-family:var(--fb);font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border:none;background:transparent;transition:color .15s;position:relative;min-height:54px;user-select:none}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;font-family:var(--fb);font-size:8px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border:none;background:transparent;transition:color .15s;position:relative;min-height:54px;user-select:none}
 .bni.active{color:var(--accent)}
 .bni.active::after{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--accent);border-radius:0 0 3px 3px}
 .bni svg{width:20px;height:20px}
@@ -402,6 +402,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .mbtn-edit{background:var(--card3);color:var(--text2)}.mbtn-edit:hover{background:var(--border2)}
 .mbtn-del{background:var(--accent-dim);color:var(--accent)}.mbtn-del:hover{background:var(--accent);color:#fff}
 .ctr-row{display:flex;justify-content:flex-end;font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:4px}
+
+/* ── PLAYER REGISTRY ── */
+.player-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.player-row:last-child{border-bottom:none}
+.player-av-sm{width:34px;height:34px;border-radius:50%;background:var(--card3);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1rem;color:var(--text2);flex-shrink:0}
+.player-info{flex:1;min-width:0}
+.player-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-meta{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px}
+.player-btns{display:flex;gap:6px;flex-shrink:0}
+.add-player-form{background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px}
+.add-player-form input{width:100%;background:var(--card3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;margin-bottom:8px}
+.add-player-form input:focus{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -432,10 +444,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
   <div class="topbar-right">
     <button class="icon-btn" id="pushBtn" onclick="togglePush()" title="Enable notifications" style="font-size:16px;display:none">🔕</button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
-    <button class="admin-btn" id="adminBtn" onclick="handleAdmin()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      Admin
-    </a>
+    
   </div>
 </div>
 
@@ -693,62 +702,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
 
 
-</div><!-- end content -->
 
-<!-- PIN MODAL -->
-<div class="overlay" id="pinOverlay">
-  <div class="modal">
-    <div class="modal-title">🔐 Admin Access</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;text-align:center">Enter your 6-digit PIN</div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-      <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
-    </div>
-    <div class="pin-err" id="pinErr"></div>
-    <div class="mactions">
-      <button class="mbtn sec" onclick="closePin()">Cancel</button>
-      <button class="mbtn pri" onclick="submitPin()">Enter</button>
-    </div>
-  </div>
-</div>
+  <!-- ═══ ADMIN PANEL ═══ -->
+  <div class="panel" id="panel-admin">
 
-<!-- EDIT POST MODAL -->
-<div class="overlay" id="editPostOverlay">
-  <div class="modal">
-    <div class="modal-title">✏️ Edit Post</div>
-    <input type="hidden" id="editPostId">
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
-      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none">
+    <!-- PIN LOCK SCREEN -->
+    <div id="adminLockScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:24px;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:12px">🔐</div>
+      <div style="font-family:var(--fh);font-size:1.8rem;letter-spacing:2px;margin-bottom:8px">Admin Access</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.6">Enter your 6-digit PIN<br>to manage Whack Group</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+        <input class="pin-i" maxlength="1" type="password" inputmode="numeric">
+      </div>
+      <div id="pinErr" style="font-size:11px;color:var(--accent);min-height:16px;margin-bottom:12px"></div>
+      <button onclick="submitPin()" style="padding:11px 32px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--fb);text-transform:uppercase;letter-spacing:.5px">Enter</button>
     </div>
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
-      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
-    </div>
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
-      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
-      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
-    </div>
-    <div class="mactions" style="margin-top:16px">
-      <button class="mbtn sec" onclick="closeEditPost()">Cancel</button>
-      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
-    </div>
-  </div>
-</div>
 
-<!-- ADMIN PANEL -->
-<div class="admin-panel" id="adminPanel">
-
-  <div style="max-width:600px;margin:0 auto">
-    <div class="adm-head">
+    <!-- ADMIN CONTENT (shown after PIN) -->
+    <div id="adminContent" style="display:none;max-width:600px;margin:0 auto;padding:0 0 20px">
+<div class="adm-head">
       <div class="adm-title">Admin Panel</div>
       <div class="adm-tag">Admin</div>
     </div>
@@ -782,31 +759,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
       </div>
     </div>
 
-    <!-- PLAYER DATA -->
+    <!-- PLAYER REGISTRY -->
     <div class="acard">
       <div class="acard-head">
-        <div class="acard-title">📊 Player Data</div>
-        <span class="acard-badge badge-ok" id="dBadge">Saved</span>
+        <div class="acard-title">👥 Players</div>
+        <span id="playerCountBadge" style="font-size:10px;color:var(--muted);font-family:var(--fm)">0 players</span>
       </div>
       <div class="acard-body">
-        <div class="sync-status-box">
-          <div class="sync-status-row"><span style="color:var(--muted)">Last sync</span><span id="lastSyncTime" style="color:var(--text2)">Never</span></div>
-          <div class="sync-status-row"><span style="color:var(--muted)">Session players</span><span id="syncSesCount" style="color:var(--text2)">—</span></div>
-          <div class="sync-status-row"><span style="color:var(--muted)">Leaderboard</span><span id="syncLbCount" style="color:var(--text2)">—</span></div>
+        <!-- Add new player form -->
+        <div class="add-player-form">
+          <input type="text" id="newPlayerName" placeholder="Player name…" maxlength="30"
+            onkeydown="if(event.key==='Enter')addPlayer()">
+          <button class="adm-save" onclick="addPlayer()" style="margin-top:0">+ Add Player</button>
         </div>
-        <div class="adm-grid">
-          <div class="adm-field full"><label>Session Tab CSV URL</label><input type="text" id="cfgSheetSession" placeholder="Paste 'session' tab published CSV…" oninput="admDirty('d')"></div>
-          <div class="adm-field full"><label>Leaderboard Tab CSV URL</label><input type="text" id="cfgSheetLB" placeholder="Paste 'leaderboard' tab published CSV…" oninput="admDirty('d')"></div>
+        <!-- Player list -->
+        <div id="adminPlayerList">
+          <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No players yet</div>
         </div>
-        <div class="adm-status" id="dStatus"></div>
-        <button class="adm-save" onclick="saveSheetCfg()">💾 Save URLs</button>
-        <button class="adm-sync-btn" onclick="syncNow()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          Sync Now
-        </button>
       </div>
     </div>
 
+    <!-- EXPORT -->
+    <div class="acard">
+      <div class="acard-head"><div class="acard-title">📤 Export</div></div>
+      <div class="acard-body"><div class="adm-note">Export all registered players and their stats as a CSV file.</div><button class="adm-save" onclick="exportPlayersCSV()">⬇️ Export Players CSV</button></div>
+    </div>
     <!-- BULLETIN -->
     <div class="acard">
       <div class="acard-head">
@@ -855,12 +832,59 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
       </div>
       <div class="acard-body" id="admManList"></div>
     </div>
+    <div style="padding:8px 0 24px"><button onclick="closeAdmin()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;font-family:var(--fb);text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:all .2s">🔒 Lock Admin</button></div>
+    </div>
+  </div>
 
-  </div><!-- end max-width wrap -->
+</div><!-- end content -->
 
-  <!-- EXIT BAR -->
-  <div class="adm-exit-bar">
-    <button class="adm-exit-btn adm-exit-clean" id="admExitBtn" onclick="closeAdmin()">← Exit Admin</button>
+<!-- EDIT PLAYER MODAL -->
+<div class="overlay" id="editPlayerOverlay">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Player</div>
+    <input type="hidden" id="editPlayerId">
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Name</label>
+      <input type="text" id="editPlayerName" maxlength="30"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:14px;outline:none">
+    </div>
+    <div style="margin-bottom:4px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Starting MMR <span style="color:var(--muted2);text-transform:none;letter-spacing:0">(default 1000)</span></label>
+      <input type="number" id="editPlayerMmr" min="0" max="9999"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:14px;outline:none">
+    </div>
+    <div class="mactions" style="margin-top:16px">
+      <button class="mbtn sec" onclick="closeEditPlayer()">Cancel</button>
+      <button class="mbtn pri" onclick="submitEditPlayer()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POST MODAL -->
+<div class="overlay" id="editPostOverlay">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Post</div>
+    <input type="hidden" id="editPostId">
+    <div style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Label</label>
+      <input type="text" id="editPostLabel" maxlength="40" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Headline</label>
+      <input type="text" id="editPostHeadline" maxlength="25" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;font-weight:600;outline:none">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--fm);margin-bottom:5px">Message</label>
+      <textarea id="editPostMsg" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;resize:vertical;min-height:100px"></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <input type="checkbox" id="editPostUrgent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+      <label for="editPostUrgent" style="font-size:13px;font-weight:500;color:var(--text2);cursor:pointer">🚨 Mark as Urgent</label>
+    </div>
+    <div class="mactions" style="margin-top:16px">
+      <button class="mbtn sec" onclick="closeEditPost()">Cancel</button>
+      <button class="mbtn pri" onclick="submitEditPost()">Save Changes</button>
+    </div>
   </div>
 </div>
 
@@ -882,11 +906,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     Stats
   </button>
+  <button class="bni" id="adminNavBtn" onclick="handleAdminTab(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Admin
+  </button>
 </div>
 
 <div id="toast"></div>
 
 <script>
+
 // ══════════════════════════════════════════════════════════════════════════
 // WHACK GROUP — Main Script
 // ══════════════════════════════════════════════════════════════════════════
@@ -1570,10 +1599,32 @@ function tick(){
 
 // ── NAVIGATION ───────────────────────────────────────────────────────────
 function nav(id,btn){
+  // If navigating away from admin, reset lock if not authed
+  if(id==='admin'){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
+    document.getElementById('panel-admin').classList.add('active');
+    if(btn) btn.classList.add('active');
+    // Show lock or content based on auth state
+    const lock=document.getElementById('adminLockScreen');
+    const content=document.getElementById('adminContent');
+    if(adminOpen){
+      if(lock) lock.style.display='none';
+      if(content) content.style.display='block';
+    } else {
+      if(lock) lock.style.display='flex';
+      if(content) content.style.display='none';
+      // Clear pin inputs
+      document.querySelectorAll('.pin-i').forEach(i=>i.value='');
+      const pe=document.getElementById('pinErr');if(pe)pe.textContent='';
+      setTimeout(()=>{const fi=document.querySelector('.pin-i');if(fi)fi.focus();},150);
+    }
+    return;
+  }
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 
 
@@ -1612,7 +1663,7 @@ if(photoEl2) photoEl2.addEventListener('change',function(){
 });
 
 // ── PIN auto-advance ─────────────────────────────────────────────────────
-(function(){const el=document.getElementById('pinOverlay');if(el)el.addEventListener('click',e=>{if(e.target===e.currentTarget)closePin();});})();
+// pin is now in admin tab panel — no overlay listener needed;
 (function(){const el=document.getElementById('gcashOverlay');if(el)el.addEventListener('click',e=>{if(e.target===e.currentTarget)el.classList.remove('open');});})();
 
 // ── URGENT CHECKBOX ──────────────────────────────────────────────────────
@@ -1658,11 +1709,12 @@ function showToast(msg){
 (async()=>{
   await loadCfg();
   await loadPosts();
+  await loadPlayers(); // load from Supabase players table
   tick();
   updateLocationDisplay();
   updateNoSessionDisplay();
   setInterval(tick,1000);
-  loadSheetData();
+  // CSV sync removed — using Supabase players table
   // Init push notifications
   if('serviceWorker' in navigator && 'PushManager' in window){
     const btn = document.getElementById('pushBtn');
@@ -1763,12 +1815,162 @@ async function sendPush(title, body, tag='whack'){
   }catch(e){ console.warn('[PUSH] Send failed:',e.message); }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PLAYER REGISTRY
+// ═══════════════════════════════════════════════════════════════════════════
+let PLAYERS = []; // master player list from Supabase
+
+async function loadPlayers(){
+  const rows = await sbGet('players','?select=*&order=mmr.desc');
+  if(rows !== null){
+    PLAYERS = rows;
+    // Merge into LB format so existing renderLB/renderStats work unchanged
+    LB = PLAYERS.map((p,i) => ({
+      id:         p.id,
+      name:       p.name,
+      mmr:        p.mmr,
+      prevRank:   i+1, // will be updated properly in Stage 3
+      wins:       p.wins,
+      losses:     p.losses,
+      lastPlayed: p.last_played ? new Date(p.last_played).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—',
+      duo:        p.best_duo||'—',
+      streak:     p.streak,
+      tier:       calcTier(p.mmr),
+    }));
+    renderLB();
+    renderStats();
+    renderAdminPlayerList();
+  }
+}
+
+function calcTier(mmr){
+  if(mmr>=2000) return 'diamond';
+  if(mmr>=1600) return 'platinum';
+  if(mmr>=1200) return 'gold';
+  if(mmr>=900)  return 'silver';
+  return 'bronze';
+}
+
+function renderAdminPlayerList(){
+  const list = document.getElementById('adminPlayerList');
+  const badge = document.getElementById('playerCountBadge');
+  if(!list) return;
+  if(badge) badge.textContent = `${PLAYERS.length} player${PLAYERS.length!==1?'s':''}`;
+  if(!PLAYERS.length){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No players yet — add your first player above</div>';
+    return;
+  }
+  list.innerHTML = PLAYERS.map((p,i) => `
+    <div class="player-row">
+      <div class="player-av-sm">${ini(p.name)}</div>
+      <div class="player-info">
+        <div class="player-name">${escHtml(p.name)}</div>
+        <div class="player-meta">${p.mmr} MMR · ${p.wins}W ${p.losses}L · ${calcTier(p.mmr)}</div>
+      </div>
+      <div class="player-btns">
+        <button class="mbtn mbtn-edit" onclick="openEditPlayer(${p.id})">✏️</button>
+        <button class="mbtn mbtn-del" onclick="confirmRemovePlayer(${p.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addPlayer(){
+  const input = document.getElementById('newPlayerName');
+  if(!input) return;
+  const name = input.value.trim();
+  if(!name){ showToast('Enter a player name'); return; }
+  if(PLAYERS.find(p=>p.name.toLowerCase()===name.toLowerCase())){
+    showToast('Player already exists'); return;
+  }
+  showToast('Adding…');
+  const result = await sbPost('players',{ name, mmr:1000, wins:0, losses:0, streak:0, best_duo:'—' });
+  if(result && result[0]){
+    PLAYERS.push(result[0]);
+    PLAYERS.sort((a,b)=>b.mmr-a.mmr);
+    input.value = '';
+    renderAdminPlayerList();
+    await loadPlayers(); // refresh LB
+    showToast(`✅ ${name} added!`);
+  } else {
+    showToast('❌ Failed — check Supabase policies');
+    console.error('[PLAYERS] addPlayer failed:', result);
+  }
+}
+
+function openEditPlayer(id){
+  const p = PLAYERS.find(x=>x.id===id); if(!p) return;
+  const sv=(eid,v)=>{const el=document.getElementById(eid);if(el)el.value=v;};
+  sv('editPlayerId', id);
+  sv('editPlayerName', p.name);
+  sv('editPlayerMmr', p.mmr);
+  const ov = document.getElementById('editPlayerOverlay');
+  if(ov) ov.classList.add('open');
+}
+function closeEditPlayer(){
+  const ov = document.getElementById('editPlayerOverlay');
+  if(ov) ov.classList.remove('open');
+}
+(function(){
+  const ov = document.getElementById('editPlayerOverlay');
+  if(ov) ov.addEventListener('click', function(e){ if(e.target===this) closeEditPlayer(); });
+})();
+
+async function submitEditPlayer(){
+  const gv = id => { const el=document.getElementById(id); return el?el.value.trim():''; };
+  const id   = parseInt(gv('editPlayerId'));
+  const name = gv('editPlayerName');
+  const mmr  = parseInt(gv('editPlayerMmr'))||1000;
+  if(!name){ showToast('Name required'); return; }
+  const result = await sbPatch('players','?id=eq.'+id,{ name, mmr });
+  if(result !== null){
+    const idx = PLAYERS.findIndex(p=>p.id===id);
+    if(idx>=0){ PLAYERS[idx].name=name; PLAYERS[idx].mmr=mmr; }
+    PLAYERS.sort((a,b)=>b.mmr-a.mmr);
+    renderAdminPlayerList();
+    await loadPlayers();
+    closeEditPlayer();
+    showToast('Player updated ✓');
+  } else showToast('❌ Update failed');
+}
+
+async function confirmRemovePlayer(id){
+  const p = PLAYERS.find(x=>x.id===id); if(!p) return;
+  if(!confirm(`Remove ${p.name} from the registry?\n\nThis deletes all their stats. This cannot be undone.`)) return;
+  const ok = await sbDelete('players','?id=eq.'+id);
+  if(ok||ok===null){
+    PLAYERS = PLAYERS.filter(x=>x.id!==id);
+    renderAdminPlayerList();
+    await loadPlayers();
+    showToast(`${p.name} removed`);
+  } else showToast('❌ Remove failed');
+}
+
+
+// ── Export players as CSV ─────────────────────────────────────────────────
+function exportPlayersCSV(){
+  if(!PLAYERS.length){ showToast('No players to export'); return; }
+  const headers=['Name','MMR','Wins','Losses','Streak','Best Duo','Tier','Last Played'];
+  const rows=PLAYERS.map(p=>[
+    p.name, p.mmr, p.wins, p.losses, p.streak,
+    p.best_duo||'—', calcTier(p.mmr),
+    p.last_played||'—'
+  ]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`whack-players-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✅ CSV downloaded');
+}
+
 // ── Re-sync when returning from admin page ────────────────────────────────
 document.addEventListener('visibilitychange', async()=>{
   if(document.visibilityState==='visible'){
-    // Only re-fetch if we've been hidden (e.g. returning from admin)
     await loadCfg();
     await loadPosts();
+    await loadPlayers();
   }
 });
 
@@ -1832,24 +2034,32 @@ function updAdmExit(){
   const btn=document.getElementById('admExitBtn');if(!btn) return;
   const d=admDirtyS||admDirtyD;
   btn.className='adm-exit-btn '+(d?'adm-exit-dirty':'adm-exit-clean');
-  btn.innerHTML=d?'<span class="adm-dot"></span> Unsaved changes — Exit Anyway?':'← Exit Admin';
+  btn.innerHTML=d?'<span class="adm-dot"></span> Unsaved — Exit?':'← Back to App';
 }
 
 // ── handleAdmin / closeAdmin ──────────────────────────────────────────────
-function handleAdmin(){
-  if(adminOpen){closeAdmin();return;}
-  const po=document.getElementById('pinOverlay');
-  if(po) po.classList.add('open');
-  document.querySelectorAll('.pin-i').forEach(i=>i.value='');
-  const pe=document.getElementById('pinErr');if(pe)pe.textContent='';
-  setTimeout(()=>{const fi=document.querySelector('.pin-i');if(fi)fi.focus();},100);
+function handleAdminTab(btn){
+  if(adminOpen){
+    nav('admin', btn);
+    return;
+  }
+  const lock=document.getElementById('adminLockScreen');
+  const content=document.getElementById('adminContent');
+  if(lock) lock.style.display='flex';
+  if(content) content.style.display='none';
+  (document.getElementById('panel-admin')||document).querySelectorAll('.pin-i').forEach(i=>i.value='');
+  const pe=document.getElementById('pinErr'); if(pe) pe.textContent='';
+  nav('admin', btn);
 }
+function handleAdmin(){ handleAdminTab(document.getElementById('adminNavBtn')); }
 function closeAdmin(){
   if((admDirtyS||admDirtyD)&&!confirm('Unsaved changes. Exit without saving?')) return;
-  adminOpen=false;
-  admDirtyS=false; admDirtyD=false;
-  const ap=document.getElementById('adminPanel');if(ap)ap.classList.remove('open');
-  const ab=document.getElementById('adminBtn');if(ab)ab.classList.remove('on');
+  adminOpen=false; admDirtyS=false; admDirtyD=false;
+  const lock=document.getElementById('adminLockScreen');
+  const content=document.getElementById('adminContent');
+  if(lock) lock.style.display='flex';
+  if(content) content.style.display='none';
+  nav('home', document.querySelector('.bni'));
 }
 function closePin(){
   const po=document.getElementById('pinOverlay');if(po)po.classList.remove('open');
@@ -1865,10 +2075,17 @@ function closePin(){
 function submitPin(){
   const code=[...document.querySelectorAll('.pin-i')].map(i=>i.value).join('');
   if(code===ADMIN_PIN){
-    closePin(); adminOpen=true;
-    const ap=document.getElementById('adminPanel');if(ap)ap.classList.add('open');
-    const ab=document.getElementById('adminBtn');if(ab)ab.classList.add('on');
-    admDirtyS=false; admDirtyD=false; updAdmExit();
+    adminOpen=true;
+    admDirtyS=false; admDirtyD=false;
+    // Show admin content, hide lock screen
+    const lock=document.getElementById('adminLockScreen');
+    const content=document.getElementById('adminContent');
+    if(lock) lock.style.display='none';
+    if(content) content.style.display='block';
+    // Highlight admin nav button
+    document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
+    const adminBtn=document.getElementById('adminNavBtn');
+    if(adminBtn) adminBtn.classList.add('active');
     // Populate fields
     const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
     sv('cfgDate',cfg.sessionDate||'');
@@ -1878,11 +2095,11 @@ function submitPin(){
     sv('cfgSeason',cfg.season||'Season 1');
     sv('cfgLocationName',cfg.locationName||'');
     sv('cfgLocationUrl',cfg.locationUrl||'');
-    sv('cfgSheetSession',cfg.sheetUrlSession||'');
-    sv('cfgSheetLB',cfg.sheetUrlLB||'');
+    // CSV fields removed
     setAdmTog('noSess',cfg.noSession);
     admBadge('sBadge','Saved',true); admBadge('dBadge','Saved',true);
     renderManagePosts();
+    renderAdminPlayerList();
   } else {
     const pe=document.getElementById('pinErr');
     if(pe)pe.textContent='Incorrect PIN. Try again.';
@@ -1923,44 +2140,10 @@ async function saveSessionCfg(){
 }
 
 // ── Save sheet URLs ───────────────────────────────────────────────────────
-async function saveSheetCfg(){
-  const gv=id=>{const e=document.getElementById(id);return e?e.value:'';}
-  cfg.sheetUrlSession=gv('cfgSheetSession').trim();
-  cfg.sheetUrlLB=gv('cfgSheetLB').trim();
-  saveCfgLocal();
-  admClean('d','✅ URLs saved — tap Sync Now to test');
-  showToast('Sheet URLs saved ✓');
-}
+
 
 // ── Sync Now (upgraded) ───────────────────────────────────────────────────
-async function syncNow(){
-  const sUrl=cfg.sheetUrlSession, lUrl=cfg.sheetUrlLB;
-  if(!sUrl&&!lUrl){showToast('No sheet URLs saved');return;}
-  showToast('⏳ Syncing…');
-  setSheetStatus('⏳ Syncing…','loading');
-  let sr=0,lr=0,so=false,lo=false;
-  for(const [url,isLB] of [[sUrl,false],[lUrl,true]]){
-    if(!url) continue;
-    try{
-      const r=await fetch(`${SB_URL}/functions/v1/fetch-csv`,{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
-        body:JSON.stringify({url})});
-      if(r.ok){const t=await r.text();if(t.length>10&&t.includes(',')){
-        const n=t.split('\n').filter(l=>l.trim()).length-1;
-        if(isLB){lr=n;lo=true;}else{sr=n;so=true;}
-      }}
-    }catch{}
-  }
-  const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  const st=(id,v,ok)=>{const e=document.getElementById(id);if(e){e.textContent=v;e.style.color=ok?'var(--green)':'var(--accent)';}};
-  st('lastSyncTime',now,true);
-  st('syncSesCount',so?`${sr} players`:'❌ Failed',so);
-  st('syncLbCount',lo?`${lr} players`:'❌ Failed',lo);
-  admBadge('dBadge',so&&lo?'Synced':'Error',so&&lo);
-  setSheetStatus(so&&lo?`✅ Synced — ${sr} session · ${lr} LB`:'⚠️ Partial sync','ok');
-  showToast(so&&lo?`✅ Synced — ${sr}+${lr} players`:'⚠️ Partial sync');
-  if(so||lo) loadSheetData();
-}
+
 
 // ── Bulletin helpers ──────────────────────────────────────────────────────
 function admWordCount(el){
@@ -2079,14 +2262,12 @@ async function submitEditPost(){
 }
 
 // ── PIN auto-advance ──────────────────────────────────────────────────────
-document.querySelectorAll('.pin-i').forEach((el,i,all)=>{
-  el.addEventListener('input',()=>{if(el.value&&i<all.length-1)all[i+1].focus();if(i===all.length-1&&el.value)submitP
+(document.getElementById('panel-admin')||document).querySelectorAll('.pin-i').forEach((el,i,all)=>{
+  el.addEventListener('input',()=>{if(el.value&&i<all.length-1)all[i+1].focus();if(i===all.length-1&&el.value)submitPin();});
   el.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!el.value&&i>0)all[i-1].focus();if(e.key==='Enter')submitPin();});
 });
 
 
-  el.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!el.value&&i>0)all[i-1].focus();if(e.key==='Enter')submitPin();});
-});
 
 async function confirmDeletePost(id){
   const p=bulletinPosts.find(x=>x.id===id);
@@ -2095,6 +2276,7 @@ async function confirmDeletePost(id){
   if(!confirm('Delete this post?\n\n"'+preview+'"\n\nThis cannot be undone.')) return;
   await deletePost(id);
 }
+
 </script>
 </body>
 </html>
