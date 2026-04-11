@@ -414,6 +414,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 .add-player-form{background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px}
 .add-player-form input{width:100%;background:var(--card3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;font-family:var(--fb);font-size:13px;outline:none;margin-bottom:8px}
 .add-player-form input:focus{border-color:var(--accent)}
+
+/* ── ATTENDANCE & RESULTS ── */
+.att-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.att-row:last-child{border-bottom:none}
+.att-av{width:32px;height:32px;border-radius:50%;background:var(--card3);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.9rem;color:var(--text2);flex-shrink:0}
+.att-name{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.att-status{display:flex;gap:4px;flex-shrink:0}
+.att-btn{padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--card2);color:var(--muted);font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .15s}
+.att-btn.coming.on{background:#16a34a22;border-color:#16a34a;color:#4ade80}
+.att-btn.tentative.on{background:#92400e22;border-color:#d97706;color:#fbbf24}
+.att-btn.out.on{background:#7f1d1d22;border-color:#dc2626;color:#f87171}
+.res-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.res-row:last-child{border-bottom:none}
+.res-name{width:90px;font-size:12px;font-weight:600;color:var(--text);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-input{width:44px;background:var(--card2);border:1px solid var(--border2);border-radius:7px;color:var(--text);padding:6px 8px;font-family:var(--fm);font-size:13px;font-weight:600;text-align:center;outline:none}
+.res-input:focus{border-color:var(--accent)}
+.res-lbl{font-size:10px;color:var(--muted);font-family:var(--fm)}
+.res-streak{display:flex;align-items:center;gap:4px}
+.res-streak input{width:36px}
 </style>
 </head>
 <body>
@@ -725,7 +744,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 
     <!-- ADMIN CONTENT (shown after PIN) -->
     <div id="adminContent" style="display:none;max-width:600px;margin:0 auto;padding:0 0 20px">
-<div class="adm-head">
+<!-- Unclosed session reminder -->
+    <div id="unclosedBanner" style="display:none;background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="font-size:1.3rem;flex-shrink:0">⚠️</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:3px">Unclosed session</div>
+          <div id="unclosedBannerDate" style="font-size:11px;color:var(--muted);margin-bottom:10px"></div>
+          <button onclick="closeSession()" class="adm-save" style="width:100%;padding:9px;font-size:11px;margin-top:0">Close &amp; Archive This Session</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-head">
       <div class="adm-title">Admin Panel</div>
       <div class="adm-tag">Admin</div>
     </div>
@@ -775,6 +806,44 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <!-- Player list -->
         <div id="adminPlayerList">
           <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No players yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSION ATTENDANCE -->
+    <div class="acard">
+      <div class="acard-head">
+        <div class="acard-title">📋 Attendance</div>
+        <span id="attendanceBadge" style="font-size:10px;color:var(--muted);font-family:var(--fm)">—</span>
+      </div>
+      <div class="acard-body">
+        <div id="attendanceGate" style="display:none;padding:10px 0;text-align:center">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm)">⚠️ No session scheduled — set a date in Session settings first</div>
+        </div>
+        <div id="attendanceList">
+          <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Loading…</div>
+        </div>
+        <div id="closeSessionWrap" style="display:none;margin-top:10px">
+          <button id="closeSessionBtn" class="adm-save" onclick="closeSession()" style="background:var(--green,#16a34a)">✅ Close &amp; Archive Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECORD RESULTS -->
+    <div class="acard">
+      <div class="acard-head">
+        <div class="acard-title">🏸 Record Results</div>
+        <span style="font-size:10px;color:var(--muted);font-family:var(--fm)">After session ends</span>
+      </div>
+      <div class="acard-body">
+        <div id="resultsGate" style="display:none;padding:10px 0;text-align:center">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm)">⚠️ No session scheduled</div>
+        </div>
+        <div id="resultsList">
+          <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Loading…</div>
+        </div>
+        <div id="resultsActions" style="display:none;margin-top:8px">
+          <button class="adm-save" onclick="saveResults()">💾 Save Results &amp; Recalculate MMR</button>
         </div>
       </div>
     </div>
@@ -937,8 +1006,8 @@ const CFG_DEFAULTS = {
   season:'Season 1',
   locationName:'',
   locationUrl:'',
-  sheetUrlSession:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=214704834&single=true&output=csv',
-  sheetUrlLB:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRdTMXcgfY2PVEmI_GIkiBUq1K7JFCKVqL6nDaaFfvUcvkAIMPqGweuZ19Bi7Am2Q/pub?gid=1526076979&single=true&output=csv'
+  sessionClosed:false,   // true after admin closes the session
+  lastClosedDate:'',     // date of last closed session
 };
 
 let cfg = {...CFG_DEFAULTS};
@@ -1439,7 +1508,14 @@ function setFilter(f,btn){
   renderSession();
 }
 function renderSession(){
-  if(!SESSION.length) return;
+  if(!SESSION.length){
+    const g=document.getElementById('playerGrid');
+    if(g) g.innerHTML='<div class="empty"><span class="empty-i">🏸</span>No attendance set yet</div>';
+    ['cntConf','cntTent','cntOut','slotN','hCntConf','hCntTent','hCntLeft','hSlotN'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.textContent='0';
+    });
+    return;
+  }
   const conf=SESSION.filter(p=>p.status==='confirmed');
   const tent=SESSION.filter(p=>p.status==='tentative');
   const out =SESSION.filter(p=>p.status==='out');
@@ -1834,13 +1910,18 @@ async function loadPlayers(){
       wins:       p.wins,
       losses:     p.losses,
       lastPlayed: p.last_played ? new Date(p.last_played).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—',
-      duo:        p.best_duo||'—',
+      duo:        '—', // best duo removed in Stage 2
       streak:     p.streak,
       tier:       calcTier(p.mmr),
     }));
     renderLB();
     renderStats();
     renderAdminPlayerList();
+    await loadAttendance();
+    renderAttendanceList();
+    renderResultsList();
+    updateUnclosedBanner();
+    updateCloseBtn();
   }
 }
 
@@ -1884,7 +1965,7 @@ async function addPlayer(){
     showToast('Player already exists'); return;
   }
   showToast('Adding…');
-  const result = await sbPost('players',{ name, mmr:1000, wins:0, losses:0, streak:0, best_duo:'—' });
+  const result = await sbPost('players',{ name, mmr:1000, wins:0, losses:0, streak:0 });
   if(result && result[0]){
     PLAYERS.push(result[0]);
     PLAYERS.sort((a,b)=>b.mmr-a.mmr);
@@ -1950,10 +2031,10 @@ async function confirmRemovePlayer(id){
 // ── Export players as CSV ─────────────────────────────────────────────────
 function exportPlayersCSV(){
   if(!PLAYERS.length){ showToast('No players to export'); return; }
-  const headers=['Name','MMR','Wins','Losses','Streak','Best Duo','Tier','Last Played'];
+  const headers=['Name','MMR','Wins','Losses','Streak','Tier','Last Played'];
   const rows=PLAYERS.map(p=>[
     p.name, p.mmr, p.wins, p.losses, p.streak,
-    p.best_duo||'—', calcTier(p.mmr),
+    calcTier(p.mmr),
     p.last_played||'—'
   ]);
   const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -2100,6 +2181,10 @@ function submitPin(){
     admBadge('sBadge','Saved',true); admBadge('dBadge','Saved',true);
     renderManagePosts();
     renderAdminPlayerList();
+    renderAttendanceList();
+    renderResultsList();
+    updateUnclosedBanner();
+    updateCloseBtn();
   } else {
     const pe=document.getElementById('pinErr');
     if(pe)pe.textContent='Incorrect PIN. Try again.';
@@ -2131,6 +2216,11 @@ async function saveSessionCfg(){
   const ds=cfg.sessionDate?new Date(cfg.sessionDate+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'Date not set';
   admClean('s',`✅ ${ds} · ${ft(cfg.hourStart,cfg.minuteStart)}–${ft(cfg.hourEnd,cfg.minuteEnd)} · ${cfg.courts} court${cfg.courts>1?'s':''}`);
   showToast('Session saved ✓');
+  onNewSessionDate();
+  // Reload attendance for new date + refresh attendance/results UI
+  await loadAttendance();
+  renderAttendanceList();
+  renderResultsList();
   // Send push notification
   if(cfg.noSession){
     // No session — don't push
@@ -2275,6 +2365,354 @@ async function confirmDeletePost(id){
   const preview=(p.headline||p.msg||'').slice(0,50);
   if(!confirm('Delete this post?\n\n"'+preview+'"\n\nThis cannot be undone.')) return;
   await deletePost(id);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STAGE 2: SESSION ATTENDANCE + RESULTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+let ATTENDANCE = {}; // { player_id: status } for current session date
+let RESULTS    = {}; // { player_id: { wins, losses, streak } } for recording
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function hasActiveSession(){
+  return !cfg.noSession && !!cfg.sessionDate;
+}
+
+// ── Load attendance for current session date ──────────────────────────────
+async function loadAttendance(){
+  if(!cfg.sessionDate){ ATTENDANCE={}; return; }
+  const rows = await sbGet('session_attendance',
+    `?session_date=eq.${cfg.sessionDate}&select=player_id,status`);
+  if(rows){
+    ATTENDANCE = {};
+    rows.forEach(r=>{ ATTENDANCE[r.player_id]=r.status; });
+  }
+  // Rebuild SESSION array for renderSession
+  rebuildSession();
+}
+
+function rebuildSession(){
+  // Build SESSION from PLAYERS + ATTENDANCE so renderSession works unchanged
+  SESSION = PLAYERS
+    .filter(p => ATTENDANCE[p.id] && ATTENDANCE[p.id] !== 'out'
+              ? true : ATTENDANCE[p.id] === 'out' ? true : false)
+    .map(p => ({
+      name:   p.name,
+      status: ATTENDANCE[p.id] || null,
+    }))
+    .filter(p => p.status); // only players with a status set
+  renderSession();
+}
+
+// ── Set player attendance status ──────────────────────────────────────────
+async function setAttendance(playerId, status){
+  if(!hasActiveSession()){ showToast('No session scheduled'); return; }
+  const existing = ATTENDANCE[playerId];
+  // If tapping same status → clear it
+  const newStatus = existing === status ? null : status;
+  if(newStatus === null){
+    // Delete the row
+    await sbDelete('session_attendance',
+      `?player_id=eq.${playerId}&session_date=eq.${cfg.sessionDate}`);
+    delete ATTENDANCE[playerId];
+  } else {
+    // Upsert (insert or update)
+    const existing_row = await sbGet('session_attendance',
+      `?player_id=eq.${playerId}&session_date=eq.${cfg.sessionDate}`);
+    if(existing_row && existing_row.length > 0){
+      await sbPatch('session_attendance',
+        `?player_id=eq.${playerId}&session_date=eq.${cfg.sessionDate}`,
+        { status: newStatus });
+    } else {
+      await sbPost('session_attendance',
+        { player_id: playerId, session_date: cfg.sessionDate, status: newStatus });
+    }
+    ATTENDANCE[playerId] = newStatus;
+  }
+  renderAttendanceList();
+  rebuildSession();
+}
+
+// ── Render attendance list in admin ──────────────────────────────────────
+function renderAttendanceList(){
+  const list  = document.getElementById('attendanceList');
+  const gate  = document.getElementById('attendanceGate');
+  const badge = document.getElementById('attendanceBadge');
+  if(!list) return;
+
+  const active = hasActiveSession();
+  if(gate) gate.style.display = active ? 'none' : 'block';
+
+  if(!PLAYERS.length){
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No players registered yet</div>';
+    if(badge) badge.textContent = '—';
+    return;
+  }
+
+  // Count statuses
+  const coming   = PLAYERS.filter(p=>ATTENDANCE[p.id]==='coming').length;
+  const tentative= PLAYERS.filter(p=>ATTENDANCE[p.id]==='tentative').length;
+  const out      = PLAYERS.filter(p=>ATTENDANCE[p.id]==='out').length;
+  if(badge) badge.textContent = active
+    ? `${coming} coming · ${tentative} maybe · ${out} out`
+    : 'No session';
+
+  const dateLabel = cfg.sessionDate
+    ? new Date(cfg.sessionDate+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})
+    : '';
+
+  list.innerHTML = `
+    ${active && dateLabel ? `<div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;text-align:center">📅 ${dateLabel}</div>` : ''}
+    ${PLAYERS.map(p => {
+      const s = ATTENDANCE[p.id] || null;
+      const dis = active ? '' : 'opacity:.4;pointer-events:none';
+      return `<div class="att-row" style="${dis}">
+        <div class="att-av">${ini(p.name)}</div>
+        <div class="att-name">${escHtml(p.name)}</div>
+        <div class="att-status">
+          <button class="att-btn coming ${s==='coming'?'on':''}"
+            onclick="setAttendance(${p.id},'coming')">✅ Coming</button>
+          <button class="att-btn tentative ${s==='tentative'?'on':''}"
+            onclick="setAttendance(${p.id},'tentative')">⏳ Maybe</button>
+          <button class="att-btn out ${s==='out'?'on':''}"
+            onclick="setAttendance(${p.id},'out')">❌ Out</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── Render results input in admin ─────────────────────────────────────────
+function renderResultsList(){
+  const list    = document.getElementById('resultsList');
+  const gate    = document.getElementById('resultsGate');
+  const actions = document.getElementById('resultsActions');
+  if(!list) return;
+
+  const active = hasActiveSession();
+  if(gate) gate.style.display = active ? 'none' : 'block';
+  if(actions) actions.style.display = active && PLAYERS.length ? 'block' : 'none';
+
+  if(!active || !PLAYERS.length){
+    list.innerHTML = active
+      ? '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No players registered yet</div>'
+      : '';
+    return;
+  }
+
+  list.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px">
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px">Player</div>
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px;text-align:center">W</div>
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px;text-align:center">L</div>
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px;text-align:center">Streak</div>
+    </div>
+    ${PLAYERS.map(p => `
+      <div class="res-row">
+        <div class="res-name" title="${escHtml(p.name)}">${escHtml(p.name)}</div>
+        <input class="res-input" id="res_w_${p.id}" type="number" min="0" max="99"
+          placeholder="0" title="Wins for ${escHtml(p.name)}">
+        <input class="res-input" id="res_l_${p.id}" type="number" min="0" max="99"
+          placeholder="0" title="Losses for ${escHtml(p.name)}">
+        <div class="res-streak">
+          <input class="res-input res-streak" id="res_s_${p.id}" type="number"
+            min="-99" max="99" value="${p.streak||0}" title="Streak for ${escHtml(p.name)}">
+        </div>
+      </div>`).join('')}`;
+}
+
+// ── Save results + recalculate MMR ────────────────────────────────────────
+async function saveResults(){
+  if(!hasActiveSession()){ showToast('No session scheduled'); return; }
+  if(!PLAYERS.length){ showToast('No players registered'); return; }
+
+  showToast('⏳ Saving results…');
+  const today = cfg.sessionDate;
+  let saved = 0;
+
+  for(const p of PLAYERS){
+    const wEl = document.getElementById(`res_w_${p.id}`);
+    const lEl = document.getElementById(`res_l_${p.id}`);
+    const sEl = document.getElementById(`res_s_${p.id}`);
+    const w = parseInt(wEl?.value)||0;
+    const l = parseInt(lEl?.value)||0;
+    const s = parseInt(sEl?.value)||p.streak||0;
+    if(w===0 && l===0) continue; // skip if no data entered
+
+    // Cumulative totals
+    const newWins   = (p.wins||0) + w;
+    const newLosses = (p.losses||0) + l;
+
+    // MMR: simple Elo-style delta based on win rate this session
+    const total = w + l;
+    const sessionWr = total > 0 ? w/total : 0.5;
+    const expected  = 1 / (1 + Math.pow(10, (1000 - p.mmr) / 400)); // vs baseline 1000
+    const K = 32;
+    const mmrDelta = Math.round(K * (sessionWr - expected));
+    const newMmr = Math.max(0, (p.mmr||1000) + mmrDelta);
+    const newTier = calcTier(newMmr);
+
+    const result = await sbPatch('players', `?id=eq.${p.id}`, {
+      wins:        newWins,
+      losses:      newLosses,
+      mmr:         newMmr,
+      streak:      s,
+      last_played: today,
+    });
+
+    if(result !== null){
+      p.wins = newWins; p.losses = newLosses;
+      p.mmr = newMmr; p.streak = s;
+      p.last_played = today;
+      saved++;
+    }
+  }
+
+  if(saved > 0){
+    await loadPlayers(); // refresh LB + session
+    renderResultsList();
+    showToast(`✅ ${saved} player${saved!==1?'s':''} updated`);
+    // Send push if session had results
+    sendPush('🏸 Session Results In!',
+      `${saved} player stats updated — check the leaderboard`, 'results');
+  } else {
+    showToast('No results entered — add wins or losses first');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SESSION CLOSE + ARCHIVE
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Check if current session date is in the past or ongoing
+function isSessionPastOrEnding(){
+  if(!cfg.sessionDate) return false;
+  const now = new Date();
+  const sessionEnd = new Date(cfg.sessionDate+'T00:00:00');
+  sessionEnd.setHours(cfg.hourEnd||22, cfg.minuteEnd||0, 0, 0);
+  return now >= sessionEnd;
+}
+
+// Check if there's an unclosed past session
+function hasUnclosedSession(){
+  if(!cfg.sessionDate || cfg.sessionClosed) return false;
+  if(!cfg.lastClosedDate) {
+    // Never closed anything — if session date is in the past, it's unclosed
+    const sessionEnd = new Date(cfg.sessionDate+'T00:00:00');
+    sessionEnd.setHours(cfg.hourEnd||22, cfg.minuteEnd||0, 0, 0);
+    return new Date() > sessionEnd;
+  }
+  // If last closed date matches current session date, it's already closed
+  return cfg.lastClosedDate !== cfg.sessionDate && isSessionPastOrEnding();
+}
+
+// Update unclosed session reminder banner
+function updateUnclosedBanner(){
+  const banner = document.getElementById('unclosedBanner');
+  const dateEl = document.getElementById('unclosedBannerDate');
+  if(!banner) return;
+  const show = hasUnclosedSession();
+  banner.style.display = show ? 'block' : 'none';
+  if(show && dateEl && cfg.sessionDate){
+    const d = new Date(cfg.sessionDate+'T00:00:00').toLocaleDateString('en-US',
+      {weekday:'long', month:'long', day:'numeric'});
+    dateEl.textContent = `${d} — Close it to record attendance & reset`;
+  }
+}
+
+// Update close session button visibility in attendance card
+function updateCloseBtn(){
+  const wrap = document.getElementById('closeSessionWrap');
+  const btn  = document.getElementById('closeSessionBtn');
+  if(!wrap || !btn) return;
+  const active = hasActiveSession();
+  if(!active){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  if(isSessionPastOrEnding()){
+    btn.textContent = '✅ Close & Archive Session';
+    btn.style.background = 'var(--green,#16a34a)';
+    btn.style.opacity = '1';
+  } else {
+    btn.textContent = '⚠️ Close Session Early';
+    btn.style.background = 'var(--amber,#d97706)';
+    btn.style.opacity = '1';
+  }
+}
+
+// Main close session function
+async function closeSession(){
+  if(!cfg.sessionDate){ showToast('No session date set'); return; }
+
+  const d = new Date(cfg.sessionDate+'T00:00:00').toLocaleDateString('en-US',
+    {weekday:'long', month:'long', day:'numeric'});
+
+  // Warn if closing early
+  if(!isSessionPastOrEnding()){
+    const ft = (h,m)=>{const ap=h>=12?'PM':'AM',hh=h%12||12;return `${hh}:${String(m).padStart(2,'0')} ${ap}`;};
+    const endTime = ft(cfg.hourEnd||22, cfg.minuteEnd||0);
+    if(!confirm(`Close session early?
+
+Session for ${d} is scheduled until ${endTime}.
+
+All "Coming" players will be recorded as attended.`)) return;
+  } else {
+    if(!confirm(`Archive session for ${d}?
+
+All "Coming" players will be marked as attended (last_played updated).
+
+Attendance will reset for the next session.`)) return;
+  }
+
+  showToast('⏳ Closing session…');
+
+  const sessionDate = cfg.sessionDate;
+
+  // 1. Stamp last_played for all "Coming" players
+  const comingPlayers = PLAYERS.filter(p => ATTENDANCE[p.id] === 'coming');
+  let stamped = 0;
+  for(const p of comingPlayers){
+    const result = await sbPatch('players', `?id=eq.${p.id}`, {
+      last_played: sessionDate
+    });
+    if(result !== null){
+      p.last_played = sessionDate;
+      stamped++;
+    }
+  }
+
+  // 2. Mark session as closed in config
+  cfg.sessionClosed  = true;
+  cfg.lastClosedDate = sessionDate;
+  await saveCfg();
+
+  // 3. Clear attendance for display (data stays in DB for history)
+  ATTENDANCE = {};
+  SESSION = [];
+
+  // 4. Refresh everything
+  await loadPlayers();
+  renderAttendanceList();
+  renderResultsList();
+  updateUnclosedBanner();
+  updateCloseBtn();
+  renderSession();
+  tick();
+
+  showToast(`✅ Session closed — ${stamped} player${stamped!==1?'s':''} recorded`);
+
+  // 5. Send push
+  sendPush('🏸 Session Wrapped!',
+    `${stamped} player${stamped!==1?'s':''} attended. Check the leaderboard for updated stats.`,
+    'session-close');
+}
+
+// Called when admin saves a NEW session date — resets closed state
+function onNewSessionDate(){
+  if(cfg.sessionDate && cfg.sessionDate !== cfg.lastClosedDate){
+    cfg.sessionClosed = false;
+  }
+  updateUnclosedBanner();
+  updateCloseBtn();
 }
 
 </script>
