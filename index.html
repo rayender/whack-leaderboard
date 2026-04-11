@@ -437,6 +437,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
 /* ── RESULTS TABS ── */
 .res-tab{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--card2);color:var(--muted);font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .15s}
 .res-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.att-chip{padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--card2);color:var(--muted);font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .15s;white-space:nowrap}
+.att-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 </style>
 </head>
 <body>
@@ -827,15 +830,37 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px
         <div id="attendanceGate" style="display:none;padding:10px 0;text-align:center">
           <div style="font-size:11px;color:var(--muted);font-family:var(--fm)">⚠️ No session scheduled — set a date in Session settings first</div>
         </div>
+        <!-- Search + Filter bar -->
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input id="attSearch" type="text" placeholder="Search player…" maxlength="30"
+            oninput="renderAttendanceList()"
+            style="flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 10px;font-family:var(--fb);font-size:12px;outline:none">
+          <select id="attSort" onchange="renderAttendanceList()"
+            style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 10px;font-family:var(--fb);font-size:12px;outline:none;cursor:pointer">
+            <option value="alpha">A → Z</option>
+            <option value="status">By Status</option>
+            <option value="lastplayed">Last Played</option>
+            <option value="mmr">By MMR</option>
+          </select>
+        </div>
+        <!-- Status filter chips -->
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
+          <button class="att-chip on" id="attChipAll"     onclick="setAttFilter('all',this)">All</button>
+          <button class="att-chip"    id="attChipComing"  onclick="setAttFilter('coming',this)">✅ Coming</button>
+          <button class="att-chip"    id="attChipTentative" onclick="setAttFilter('tentative',this)">⏳ Maybe</button>
+          <button class="att-chip"    id="attChipOut"     onclick="setAttFilter('out',this)">❌ Out</button>
+          <button class="att-chip"    id="attChipNone"    onclick="setAttFilter('none',this)">— Not Set</button>
+        </div>
         <div id="attendanceList">
           <div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Loading…</div>
         </div>
+        <!-- Buttons: Update Status first (safer), Save Attendance second -->
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-          <button class="adm-save" onclick="saveAttendance()">💾 Save Attendance for This Session</button>
           <div style="display:flex;gap:8px">
-            <button onclick="updateAttendance()" style="flex:1;padding:10px;background:var(--card2);border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .2s">↻ Update Status</button>
-            <button onclick="clearAttendance()" style="padding:10px 14px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">✕ Clear</button>
+            <button onclick="updateAttendance()" style="flex:1;padding:11px;background:var(--card2);border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);text-transform:uppercase;letter-spacing:.4px;transition:all .2s">↻ Update Status</button>
+            <button onclick="clearAttendance()" style="padding:11px 14px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--fb);white-space:nowrap">✕ Clear</button>
           </div>
+          <button class="adm-save" onclick="saveAttendance()" style="background:var(--card3);border:1px solid var(--border2);color:var(--muted2)">🔒 Save &amp; Record Attendance</button>
         </div>
       </div>
     </div>
@@ -2482,7 +2507,16 @@ async function saveAttendance(){
   showToast(`✅ Attendance saved — ${saved} player${saved!==1?'s':''} set`);
 }
 
-// ── Render attendance list in admin ──────────────────────────────────────
+
+let attFilter = 'all'; // current attendance status filter
+
+function setAttFilter(f, btn){
+  attFilter = f;
+  document.querySelectorAll('.att-chip').forEach(c=>c.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  renderAttendanceList();
+}
+// ── Render attendance list in admin (with search/filter/sort) ────────────
 function renderAttendanceList(){
   const list  = document.getElementById('attendanceList');
   const gate  = document.getElementById('attendanceGate');
@@ -2498,33 +2532,75 @@ function renderAttendanceList(){
     return;
   }
 
-  // Count statuses
+  // Count statuses for badge
   const coming   = PLAYERS.filter(p=>ATTENDANCE[p.id]==='coming').length;
   const tentative= PLAYERS.filter(p=>ATTENDANCE[p.id]==='tentative').length;
   const out      = PLAYERS.filter(p=>ATTENDANCE[p.id]==='out').length;
+  const notSet   = PLAYERS.filter(p=>!ATTENDANCE[p.id]).length;
   if(badge) badge.textContent = active
     ? `${coming} coming · ${tentative} maybe · ${out} out`
     : 'No session';
+
+  // Search
+  const q = (document.getElementById('attSearch')?.value||'').toLowerCase().trim();
+  // Sort
+  const sortBy = document.getElementById('attSort')?.value || 'alpha';
+  // Filter
+  const f = attFilter || 'all';
+
+  // Apply search + filter
+  const statusOrder = {coming:0,tentative:1,out:2,null:3,undefined:3};
+  let players = [...PLAYERS];
+
+  if(q) players = players.filter(p=>p.name.toLowerCase().includes(q));
+
+  if(f !== 'all'){
+    if(f === 'none') players = players.filter(p=>!ATTENDANCE[p.id]);
+    else             players = players.filter(p=>ATTENDANCE[p.id]===f);
+  }
+
+  // Sort
+  if(sortBy === 'alpha'){
+    players.sort((a,b)=>a.name.localeCompare(b.name));
+  } else if(sortBy === 'status'){
+    players.sort((a,b)=>(statusOrder[ATTENDANCE[a.id]]??3)-(statusOrder[ATTENDANCE[b.id]]??3)||(a.name.localeCompare(b.name)));
+  } else if(sortBy === 'lastplayed'){
+    players.sort((a,b)=>{
+      const da = a.last_played||''; const db = b.last_played||'';
+      return db.localeCompare(da) || a.name.localeCompare(b.name);
+    });
+  } else if(sortBy === 'mmr'){
+    players.sort((a,b)=>(b.mmr||0)-(a.mmr||0));
+  }
 
   const dateLabel = cfg.sessionDate
     ? new Date(cfg.sessionDate+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})
     : '';
 
+  if(!players.length){
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:16px">${q?'No players match "'+escHtml(q)+'"':'No players in this filter'}</div>`;
+    return;
+  }
+
   list.innerHTML = `
-    ${active && dateLabel ? `<div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;text-align:center">📅 ${dateLabel}</div>` : ''}
-    ${PLAYERS.map(p => {
+    ${active && dateLabel ? `<div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;text-align:center">📅 ${dateLabel} · ${PLAYERS.length} players</div>` : ''}
+    ${players.map(p => {
       const s = ATTENDANCE[p.id] || null;
+      const lp = p.last_played ? new Date(p.last_played+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : null;
       const dis = active ? '' : 'opacity:.4;pointer-events:none';
       return `<div class="att-row" style="${dis}">
         <div class="att-av">${ini(p.name)}</div>
-        <div class="att-name">${escHtml(p.name)}</div>
+        <div class="att-name">
+          ${escHtml(p.name)}
+          ${lp?`<div style="font-size:9px;color:var(--muted);font-family:var(--fm)">🗓 ${lp}</div>`:''}
+        </div>
         <div class="att-status">
           <button class="att-btn coming ${s==='coming'?'on':''}"
-            onclick="setAttendance(${p.id},'coming')">✅ Coming</button>
+            onclick="setAttendance(${p.id},'coming')">✅</button>
           <button class="att-btn tentative ${s==='tentative'?'on':''}"
-            onclick="setAttendance(${p.id},'tentative')">⏳ Maybe</button>
+            onclick="setAttendance(${p.id},'tentative')">⏳</button>
           <button class="att-btn out ${s==='out'?'on':''}"
-            onclick="setAttendance(${p.id},'out')">❌ Out</button>
+            onclick="setAttendance(${p.id},'out')">❌</button>
         </div>
       </div>`;
     }).join('')}`;
