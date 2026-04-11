@@ -1628,8 +1628,17 @@ function renderStats(){
     document.getElementById('wrList').innerHTML='';
     return;
   }
-  const total=LB.reduce((a,p)=>a+p.wins+p.losses,0)/2;
-    document.getElementById('wrList').innerHTML=[...LB].sort((a,b)=>safeWr(b)-safeWr(a)).map((p,i)=>{
+  // Overview stat cards
+  const topW=LB.reduce((a,b)=>b.wins>a.wins?b:a,LB[0]);
+  const topGames=LB.reduce((a,b)=>(b.wins+b.losses)>(a.wins+a.losses)?b:a,LB[0]);
+  document.getElementById('statCards').innerHTML=`
+    <div class="sc"><div class="sc-lbl">Total Players</div><div class="sc-val">${LB.length}</div></div>
+    <div class="sc"><div class="sc-lbl">Most Wins</div><div class="sc-val">${topW.wins}</div><div class="sc-sub">${escHtml(topW.name)}</div></div>
+    <div class="sc"><div class="sc-lbl">Most Games</div><div class="sc-val">${topGames.wins+topGames.losses}</div><div class="sc-sub">${escHtml(topGames.name)}</div></div>
+    <div class="sc"><div class="sc-lbl">Top MMR</div><div class="sc-val">${LB[0].mmr}</div><div class="sc-sub">${escHtml(LB[0].name)}</div></div>
+  `;
+  // Win rate list
+  document.getElementById('wrList').innerHTML=[...LB].sort((a,b)=>safeWr(b)-safeWr(a)).map((p,i)=>{
     const w=safeWr(p);
     return `<div class="ritem"><div class="ri-idx">${i+1}</div><div class="lbav">${ini(p.name)}</div>
       <div style="flex:1">
@@ -1642,6 +1651,9 @@ function renderStats(){
       </div>
       <div style="font-family:var(--fm);font-size:12px;font-weight:500;color:var(--green)">${w}%</div></div>`;
   }).join('');
+}
+
+
 // ── COUNTDOWN ────────────────────────────────────────────────────────────
 function nextSessionDate(){
   if(cfg.sessionDate){
@@ -2147,14 +2159,12 @@ function closeAdmin(){
   if(content) content.style.display='none';
   nav('home', document.querySelector('.bni'));
 }
-function closePin(){
-  const po=document.getElementById('pinOverlay');if(po)po.classList.remove('open');
-}
+function closePin(){ /* pin is now in panel-admin lock screen */ }
 (function(){
-  const po=document.getElementById('pinOverlay');
-  if(po) po.addEventListener('click',function(e){if(e.target===this)closePin();});
   const ep=document.getElementById('editPostOverlay');
   if(ep) ep.addEventListener('click',function(e){if(e.target===this)closeEditPost();});
+  const el=document.getElementById('editPlayerOverlay');
+  if(el) el.addEventListener('click',function(e){if(e.target===this)closeEditPlayer();});
 })();
 
 // ── submitPin ────────────────────────────────────────────────────────────
@@ -2672,20 +2682,18 @@ function updateUnclosedBanner(){
 
 // Update close session button visibility in attendance card
 function updateCloseBtn(){
-  const wrap = document.getElementById('closeSessionWrap');
+  const wrap = document.getElementById('sessionActionsWrap');
   const btn  = document.getElementById('closeSessionBtn');
-  if(!wrap || !btn) return;
-  const active = hasActiveSession();
-  if(!active){ wrap.style.display='none'; return; }
-  wrap.style.display = 'block';
+  if(!wrap) return;
+  const show = !!cfg.sessionDate && !cfg.sessionClosed;
+  wrap.style.display = show ? 'flex' : 'none';
+  if(!btn) return;
   if(isSessionPastOrEnding()){
-    btn.textContent = '✅ Close & Archive Session';
+    btn.textContent = '✅ Close Session';
     btn.style.background = 'var(--green,#16a34a)';
-    btn.style.opacity = '1';
   } else {
-    btn.textContent = '⚠️ Close Session Early';
+    btn.textContent = '⚠️ Close Early';
     btn.style.background = 'var(--amber,#d97706)';
-    btn.style.opacity = '1';
   }
 }
 
@@ -2822,7 +2830,6 @@ function updateSessionActionsWrap(){
   updateCloseBtn();
 }
 
-}
 </script>
 </body>
 </html>
